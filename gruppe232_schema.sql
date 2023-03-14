@@ -14,8 +14,8 @@ CREATE TABLE TogruteTabell (
 CREATE TABLE StasjonerITabell (
     Stasjonsnavn VARCHAR(30) NOT NULL,
     TogruteTabellID INTEGER NOT NULL,
-    Avgangstid TIME NOT NULL,
-    Ankomsttid TIME NOT NULL,
+    Avgangstid TIME,
+    Ankomsttid TIME,
     PRIMARY KEY (Stasjonsnavn, TogruteTabellID),
     CONSTRAINT StasjonerITabellFK1 FOREIGN KEY (Stasjonsnavn) REFERENCES Jernbanestasjon(Stasjonsnavn)
         ON UPDATE CASCADE ON DELETE CASCADE,
@@ -60,7 +60,7 @@ CREATE TABLE Togrute (
 );
 
 CREATE TABLE Delstrekning (
-    StrekningsID VARCHAR(30), 
+    StrekningsID INTEGER, 
     Startstasjon VARCHAR(30) NOT NULL,
     EndeStasjon VARCHAR(30) NOT NULL,
     Lengde INTEGER,
@@ -175,10 +175,10 @@ CREATE TABLE BestårAv (
     Vognnavn VARCHAR(30),
     VognoppsettID INTEGER,
     TogruteID INTEGER,
-    NummerForfra INT NOT NULL, 
+    NummerForfra INTEGER, 
     SovevognID INTEGER, 
     SittevognID INTEGER, 
-    PRIMARY KEY (Vognnavn, VognoppsettID, TogruteID),
+    PRIMARY KEY (Vognnavn, VognoppsettID, TogruteID, NummerForfra),
     CONSTRAINT BestårAvFK1 FOREIGN KEY (Vognnavn) REFERENCES Vogntype(Vognnavn)
         ON UPDATE CASCADE ON DELETE NO ACTION,
     CONSTRAINT BestårAvFK2 FOREIGN KEY (VognoppsettID) REFERENCES Vognoppsett(VognoppsettID)
