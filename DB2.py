@@ -3,6 +3,7 @@ import sqlite3, datetime
 con = sqlite3.connect('232DB.db')
 cursor = con.cursor()
 
+<<<<<<< HEAD
 # stasjon = input("Skriv inn stasjon: ")
 # dag = input("Skriv inn dag: ")
 
@@ -33,10 +34,36 @@ AND Avgangstid >= ?", (ukedag1), (ukedag2), (startStasjon), (sluttStasjon), (klo
 # Mobilnummer = input("Skriv inn mobilnummer: ")
 
 # cursor.execute('''INSERT INTO Kunde VALUES (?, ?, ?, ?)''', (Kundenummer, Kundenavn, Epost, Mobilnummer))
+=======
+
+# Brukerhistorie c
+stasjon = input("Skriv inn stasjon: ")
+dag = input("Skriv inn dag: ")
+
+cursor.execute("select TogruteID from StasjonerITabell natural join (select * from Togrutetabell natural join (select * from TogruteForekomst where Ukedag = ?)) where Stasjonsnavn = ?", (dag, stasjon))
+forekomster = cursor.fetchall()
+print(forekomster)
+
+
+# Brukerhistorie e
+Kundenummer = 0
+cursor.execute("select Kundenummer from Kunde")
+Kundenummer = cursor.fetchall()[-1][0]
+Kundenummer += 1
+Kundenavn = input("Skriv inn navnet ditt: ")
+Epost = input("Skriv inn E-post: ")
+Mobilnummer = input("Skriv inn mobilnummer: ")
+
+cursor.execute('''INSERT INTO Kunde VALUES (?, ?, ?, ?)''',
+               (Kundenummer, Kundenavn, Epost, Mobilnummer))
+>>>>>>> 9ce725020b12d671388353d1a74127a881638978
 
 
 con.commit()
 
 con.close()
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 9ce725020b12d671388353d1a74127a881638978
