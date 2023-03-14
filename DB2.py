@@ -1,6 +1,6 @@
-# New file
 import sqlite3
 import datetime
+from collections import deque
 con = sqlite3.connect('232DB.db')
 cursor = con.cursor()
 
@@ -57,36 +57,38 @@ def Brukerhistorie_d():
         case 6:
             ukedag2 = "Søndag"
 
-    cursor.execute('''select Startstasjon, Endestasjon, Avgangstid, TogruteID, Ukedag from StasjonerITabell join
-    (select TogruteTabellID as TabellID, TogruteID, Ukedag, Startstasjon, EndeStasjon from TogruteTabell natural join
-    (select * from TogruteForekomst natural join (select * from TogruteHarDelstrekning natural join
-    (select * from Delstrekning where Startstasjon = ? and EndeStasjon = ?))
-    where Ukedag = ? or Ukedag = ?)) on TabellID = TogruteTabellID and Startstasjon = Stasjonsnavn
-    where Avgangstid >= ?''', (startStasjon, sluttStasjon, ukedag1, ukedag2, klokkeslett))
+    delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
+    delstrekningIDFint = []
+    for i in delstrekninger:
+        delstrekningIDFint.append(i[0])
+    cursor.execute(
+        "SELECT distinct TogruteID FROM Togrute")
+    togruteID = cursor.fetchall()
+    IDer = []
+    for i in togruteID:
+        IDer.append(i[0])
+    godkjentTogID = []
+    for i in IDer:
+        cursor.execute(
+            "SELECT StrekningsID FROM TogruteHarDelstrekning where TogruteID = ?", (i,))
+        TogruteHarDelstrekning = cursor.fetchall()
+        penListe = []
+        for x in TogruteHarDelstrekning:
+            penListe.append(x[0])
+        common_list = set(delstrekningIDFint).intersection(penListe)
+        if len(common_list) == len(delstrekningIDFint):
+            godkjentTogID.append(i)
 
+    cursor.execute(
+        '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join 
+        (select * from TogruteTabell natural join 
+        (select * from TogruteForekomst where Ukedag = ? or Ukedag = ?)) 
+        where Avgangstid >= ? and Stasjonsnavn = ?''', (ukedag1, ukedag2, klokkeslett, startStasjon))
     avgangs = cursor.fetchall()
-    print(avgangs)
 
-# cursor.execute('''select * from StasjonerITabell natural join
-# (select * from TogruteForekomst natural join
-# TogruteTabell where Ukedag = ? or Ukedag = ?)
-# where Stasjonsnavn = ? and Avgangstid != "" and Avgangstid >= ? ''', (ukedag1, ukedag2, startStasjon, klokkeslett))
-
-# avgangs = cursor.fetchall()
-
-# cursor.execute('''select * from StasjonerITabell natural join
-# (select * from TogruteForekomst natural join
-# TogruteTabell where Ukedag = ? or Ukedag = ?)
-# where Stasjonsnavn = ? and Ankomsttid != ""''', (ukedag1, ukedag2, sluttStasjon))
-
-# ankomster = cursor.fetchall()
-
-# for i in avgangs:
-#     for j in ankomster:
-#         if i[5] == j[5] and i[4] == j[4]:
-#             if i[2] is not None and j[3] is not None:
-#                 if i[2] <= j[3]:
-#                     print(i + j)
+    for i in avgangs:
+        if i[2] in godkjentTogID:
+            print(i)
 
 
 def brukerhistorie_e():
@@ -252,29 +254,45 @@ def printKunder():
     kunder = cursor.fetchall()
     print(kunder)
 
-# con.close()
+
+def findDelstrekning(start_station, end_station):
+    # create a set to keep track of visited stations
+    visited = set()
+
+    # create a queue to store stations to visit
+    queue = deque([(start_station, [])])
+
+    # create a list to store all possible routes
+    routes = []
+
+    # perform BFS to find all possible routes
+    while queue:
+        curr_station, curr_route = queue.popleft()
+        visited.add(curr_station)
+
+        # if we've reached the end station, add the current route to the list of routes
+        if curr_station == end_station:
+            routes.append(curr_route + [curr_station])
+
+        # otherwise, add all unvisited stations connected to the current station to the queue
+        else:
+            cursor.execute(
+                "SELECT EndeStasjon FROM Delstrekning WHERE Startstasjon = ?", (curr_station,))
+            for next_station in cursor.fetchall():
+                if next_station[0] not in visited:
+                    queue.append(
+                        (next_station[0], curr_route + [curr_station]))
+
+    returnList = []
+    for i in range(1, len(routes[0])):
+        cursor.execute(
+            "SELECT * FROM Delstrekning WHERE Startstasjon = ? AND EndeStasjon = ?", (routes[0][i - 1], routes[0][i]))
+        returnList.append(cursor.fetchall()[0])
+    return returnList
 
 
 if __name__ == "__main__":
-    # brukerhistorie_e()
-    buyTicket()
-    # brukerhistorie_h()
-    printKunder()
+    print("Velkommen til Togtider AS")
+    Brukerhistorie_d()
 
-# Midlertidig
-# cursor.execute("SELECT tf.TogruteID FROM (TogruteForekomst AS tf JOIN \
-#     (StasjonerITabell AS st JOIN Togrutetabell as tt ON st.TogruteTabellID = \
-#         tt.TogruteTabellID JOIN Togrute as tr ON tr.TogruteID = tt.TogruteID) ON tt.TogruteID = tf.TogruteID) WHERE (Ukedag = ? OR \
-#             Ukedag = ?) AND Startstasjon = ? AND Sluttstasjon = ? \
-#     AND Avgangstid >= ? ORDER BY Klokkeslett", (ukedag1, ukedag2, startStasjon, sluttStasjon, klokkeslett))
-# resultat = cursor.fetchall()
-# print(resultat)
-
-
-# cursor.execute("SELECT tf.TogruteID FROM (TogruteForekomst AS tf JOIN \
-#     (StasjonerITabell AS st JOIN Togrutetabell as tt ON st.TogruteTabellID = \
-#         tt.TogruteTabellID JOIN Togrute as tr ON tr.TogruteID = tt.TogruteID) ON tt.TogruteID = tf.TogruteID) WHERE (Ukedag = ? OR \
-#             Ukedag = ?) AND Startstasjon = ? AND Sluttstasjon = ? \
-#     AND Avgangstid >= ? ORDER BY Klokkeslett", (ukedag1, ukedag2, startStasjon, sluttStasjon, klokkeslett))
-# resultat = cursor.fetchall()
-# print(resultat)
+con.close()
