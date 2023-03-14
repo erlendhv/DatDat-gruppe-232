@@ -1,5 +1,5 @@
 #Jernbanestasjon
-insert into Jernbanestasjon values ("Trondheim", 5.1);
+insert into Jernbanestasjon values ("Trondheim S", 5.1);
 insert into Jernbanestasjon values ("Steinkjer", 3.6);
 insert into Jernbanestasjon values ("Mosjøen", 6.8);
 insert into Jernbanestasjon values ("Mo i Rana", 3.5);
@@ -7,10 +7,10 @@ insert into Jernbanestasjon values ("Fauske", 34);
 insert into Jernbanestasjon values ("Bodø", 4.1);
 
 #Banestrekning
-insert into Banestrekning values ("Nordlandsbanen", "Diesel", 5, "Trondheim", "Bodø");
+insert into Banestrekning values ("Nordlandsbanen", "Diesel", 5, "Trondheim S", "Bodø");
 
 #BanestrekningHarStasjoner
-insert into BanestrekningHarStasjoner values ("Trondheim", "Nordlandsbanen");
+insert into BanestrekningHarStasjoner values ("Trondheim S", "Nordlandsbanen");
 insert into BanestrekningHarStasjoner values ("Steinkjer", "Nordlandsbanen");
 insert into BanestrekningHarStasjoner values ("Mosjøen", "Nordlandsbanen");
 insert into BanestrekningHarStasjoner values ("Mo i Rana", "Nordlandsbanen");
@@ -18,7 +18,7 @@ insert into BanestrekningHarStasjoner values ("Fauske", "Nordlandsbanen");
 insert into BanestrekningHarStasjoner values ("Bodø", "Nordlandsbanen");
 
 #Delstrekning
-insert into Delstrekning values (1, "Trondheim", "Steinkjer", 120, "Dobbel", "Nordlandsbanen");
+insert into Delstrekning values (1, "Trondheim S", "Steinkjer", 120, "Dobbel", "Nordlandsbanen");
 insert into Delstrekning values (2, "Steinkjer", "Mosjøen", 280, "Enkel", "Nordlandsbanen");
 insert into Delstrekning values (3, "Mosjøen", "Mo i Rana", 90, "Enkel", "Nordlandsbanen");
 insert into Delstrekning values (4, "Mo i Rana", "Fauske", 170, "Enkel", "Nordlandsbanen");
@@ -27,15 +27,37 @@ insert into Delstrekning values (6, "Bodø", "Fauske", 60, "Enkel", "Nordlandsba
 insert into Delstrekning values (7, "Fauske", "Mo i Rana", 170, "Enkel", "Nordlandsbanen");
 insert into Delstrekning values (8, "Mo i Rana", "Mosjøen", 90, "Enkel", "Nordlandsbanen");
 insert into Delstrekning values (9, "Mosjøen", "Steinkjer", 280, "Enkel", "Nordlandsbanen");
-insert into Delstrekning values (10, "Steinkjer", "Trondheim", 120, "Dobbel", "Nordlandsbanen");
+insert into Delstrekning values (10, "Steinkjer", "Trondheim S", 120, "Dobbel", "Nordlandsbanen");
+
+insert into Delstrekning values (11, "Trondheim S", "Mosjøen", 400, "Begge", "Nordlandsbanen");
+insert into Delstrekning values (12, "Trondheim S", "Mo i Rana", 490, "Begge", "Nordlandsbanen");
+insert into Delstrekning values (13, "Trondheim S", "Fauske", 660, "Begge", "Nordlandsbanen");
+insert into Delstrekning values (14, "Trondheim S", "Bodø", 720, "Begge", "Nordlandsbanen");
+insert into Delstrekning values (15, "Steinkjer", "Mo i Rana", 370, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (16, "Steinkjer", "Fauske", 540, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (17, "Steinkjer", "Bodø", 600, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (18, "Mosjøen", "Fauske", 260, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (19, "Mosjøen", "Bodø", 320, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (20, "Mo i Rana", "Bodø", 230, "Enkel", "Nordlandsbanen");
+
+insert into Delstrekning values (21, "Bodø", "Mo i Rana", 230, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (22, "Bodø", "Mosjøen", 320, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (23, "Bodø", "Steinkjer", 600, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (24, "Bodø", "Trondheim S", 720, "Begge", "Nordlandsbanen");
+insert into Delstrekning values (25, "Fauske", "Mosjøen", 170, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (26, "Fauske", "Steinkjer", 540, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (27, "Fauske", "Trondheim S", 660, "Begge", "Nordlandsbanen");
+insert into Delstrekning values (28, "Mo i Rana", "Steinkjer", 370, "Enkel", "Nordlandsbanen");
+insert into Delstrekning values (29, "Mo i Rana", "Trondheim S", 490, "Begge", "Nordlandsbanen");
+insert into Delstrekning values (30, "Mosjøen", "Trondheim S", 400, "Begge", "Nordlandsbanen");
 
 #Operatør
 insert into Operatør values ("SJ", 4, 1);
 
 #Togrute
-insert into Togrute values (1, "I", "Trondheim", "Bodø", "SJ", "Nordlandsbanen");
-insert into Togrute values (2, "I", "Trondheim", "Bodø", "SJ", "Nordlandsbanen");
-insert into Togrute values (3, "Mot", "Mo i Rana", "Trondheim", "SJ", "Nordlandsbanen");
+insert into Togrute values (1, "I", "Trondheim S", "Bodø", "SJ", "Nordlandsbanen");
+insert into Togrute values (2, "I", "Trondheim S", "Bodø", "SJ", "Nordlandsbanen");
+insert into Togrute values (3, "Mot", "Mo i Rana", "Trondheim S", "SJ", "Nordlandsbanen");
 
 #TogruteHarDelstrekning
 insert into TogruteHarDelstrekning values (1, 1, "Nordlandsbanen");
@@ -52,19 +74,45 @@ insert into TogruteHarDelstrekning values (3, 8, "Nordlandsbanen");
 insert into TogruteHarDelstrekning values (3, 9, "Nordlandsbanen");
 insert into TogruteHarDelstrekning values (3, 10, "Nordlandsbanen");
 
+insert into TogruteHarDelstrekning values (1, 11, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 12, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 13, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 14, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 15, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 16, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 17, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 18, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 19, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (1, 20, "Nordlandsbanen");
+
+insert into TogruteHarDelstrekning values (2, 11, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 12, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 13, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 14, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 15, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 16, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 17, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 18, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 19, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (2, 20, "Nordlandsbanen");
+
+insert into TogruteHarDelstrekning values (3, 28, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (3, 29, "Nordlandsbanen");
+insert into TogruteHarDelstrekning values (3, 30, "Nordlandsbanen");
+
 #TogruteTabell
 insert into TogruteTabell values (1, 1);
 insert into TogruteTabell values (2, 2);
 insert into TogruteTabell values (3, 3);
 
 #StasjonerITabell
-insert into StasjonerITabell values ("Trondheim", 1, "07:49:00", null);
+insert into StasjonerITabell values ("Trondheim S", 1, "07:49:00", null);
 insert into StasjonerITabell values ("Steinkjer", 1, "09:51:00", "09:51:00");
 insert into StasjonerITabell values ("Mosjøen", 1, "13:20:00", "13:20:00");
 insert into StasjonerITabell values ("Mo i Rana", 1, "14:31:00", "14:31:00");
 insert into StasjonerITabell values ("Fauske", 1, "16:49:00", "16:49:00");
 insert into StasjonerITabell values ("Bodø", 1, null, "17:34:00");
-insert into StasjonerITabell values ("Trondheim", 2, "23:05:00", null);
+insert into StasjonerITabell values ("Trondheim S", 2, "23:05:00", null);
 insert into StasjonerITabell values ("Steinkjer", 2, "00:57:00", "00:57:00");
 insert into StasjonerITabell values ("Mosjøen", 2, "04:41:00", "04:41:00");
 insert into StasjonerITabell values ("Mo i Rana", 2, "05:55:00", "05:55:00");
@@ -73,7 +121,7 @@ insert into StasjonerITabell values ("Bodø", 2, null, "09:05:00");
 insert into StasjonerITabell values ("Mo i Rana", 3, "08:11:00", null);
 insert into StasjonerITabell values ("Mosjøen", 3, "09:14:00", "09:14:00");
 insert into StasjonerITabell values ("Steinkjer", 3, "12:31:00", "12:31:00");
-insert into StasjonerITabell values ("Trondheim", 3, null, "14:13:00");
+insert into StasjonerITabell values ("Trondheim S", 3, null, "14:13:00");
 
 #TogruteForekomst
 insert into TogruteForekomst values ("Mandag", 1);
@@ -130,6 +178,7 @@ insert into Sete values (9, 1);
 insert into Sete values (10, 1);
 insert into Sete values (11, 1);
 insert into Sete values (12, 1);
+
 insert into Sete values (1, 2);
 insert into Sete values (2, 2);
 insert into Sete values (3, 2);
@@ -142,6 +191,7 @@ insert into Sete values (9, 2);
 insert into Sete values (10, 2);
 insert into Sete values (11, 2);
 insert into Sete values (12, 2);
+
 insert into Sete values (1, 3);
 insert into Sete values (2, 3);
 insert into Sete values (3, 3);
@@ -154,6 +204,7 @@ insert into Sete values (9, 3);
 insert into Sete values (10, 3);
 insert into Sete values (11, 3);
 insert into Sete values (12, 3);
+
 insert into Sete values (1, 4);
 insert into Sete values (2, 4);
 insert into Sete values (3, 4);

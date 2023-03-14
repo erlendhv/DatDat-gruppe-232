@@ -23,6 +23,14 @@ CREATE TABLE StasjonerITabell (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+CREATE TABLE TogruteForekomst (
+  Ukedag VARCHAR(10),
+  TogruteID INTEGER,
+  PRIMARY KEY (Ukedag, TogruteID),
+  CONSTRAINT TogruteForekomstFK FOREIGN KEY (TogruteID) REFERENCES Togrute(TogruteID)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
 CREATE TABLE Operatør (
     Operatørnavn VARCHAR(30) PRIMARY KEY,
     AntallSittevogner INTEGER NOT NULL,
@@ -196,15 +204,6 @@ CREATE TABLE Kunde (
   Kundenavn VARCHAR(30) NOT NULL,
   Epost VARCHAR(30) NOT NULL UNIQUE,
   Mobilnummer INTEGER NOT NULL UNIQUE
-);
-
-
-CREATE TABLE TogruteForekomst (
-  Ukedag VARCHAR(10),
-  TogruteID INTEGER,
-  PRIMARY KEY (Ukedag, TogruteID),
-  CONSTRAINT TogruteForekomstFK FOREIGN KEY (TogruteID) REFERENCES Togrute(TogruteID)
-        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 
