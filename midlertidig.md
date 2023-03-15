@@ -74,3 +74,5 @@ insert into TogruteHarDelstrekning values (3, 30, "Nordlandsbanen");
 
     # avgangs = cursor.fetchall()
     # print(avgangs)
+
+insert into SeteBillettTilhørerDelstrekning values (2023-)

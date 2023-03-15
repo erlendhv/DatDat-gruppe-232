@@ -5,7 +5,7 @@ con = sqlite3.connect('232DB.db')
 cursor = con.cursor()
 
 
-def rukerhistorie_c():
+def brukerhistorie_c():
     stasjon = input("Skriv inn stasjon: ")
     dag = input("Skriv inn dag: ")
 
@@ -14,7 +14,7 @@ def rukerhistorie_c():
     print(forekomster)
 
 
-def Brukerhistorie_d():
+def brukerhistorie_d():
     startStasjon = input("Skriv inn ønsket startstasjon: ")
     sluttStasjon = input("Skriv inn ønsket sluttstasjon: ")
     dato_str = input("Angi ønsket dato (YYYY-MM-DD): ")
@@ -57,27 +57,28 @@ def Brukerhistorie_d():
         case 6:
             ukedag2 = "Søndag"
 
-    delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
-    delstrekningIDFint = []
-    for i in delstrekninger:
-        delstrekningIDFint.append(i[0])
-    cursor.execute(
-        "SELECT distinct TogruteID FROM Togrute")
-    togruteID = cursor.fetchall()
-    IDer = []
-    for i in togruteID:
-        IDer.append(i[0])
-    godkjentTogID = []
-    for i in IDer:
-        cursor.execute(
-            "SELECT StrekningsID FROM TogruteHarDelstrekning where TogruteID = ?", (i,))
-        TogruteHarDelstrekning = cursor.fetchall()
-        penListe = []
-        for x in TogruteHarDelstrekning:
-            penListe.append(x[0])
-        common_list = set(delstrekningIDFint).intersection(penListe)
-        if len(common_list) == len(delstrekningIDFint):
-            godkjentTogID.append(i)
+    godkjentTogID = findTogruteID(startStasjon, sluttStasjon)
+    # delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
+    # delstrekningIDFint = []
+    # for i in delstrekninger:
+    #     delstrekningIDFint.append(i[0])
+    # cursor.execute(
+    #     "SELECT distinct TogruteID FROM Togrute")
+    # togruteID = cursor.fetchall()
+    # IDer = []
+    # for i in togruteID:
+    #     IDer.append(i[0])
+    # godkjentTogID = []
+    # for i in IDer:
+    #     cursor.execute(
+    #         "SELECT StrekningsID FROM TogruteHarDelstrekning where TogruteID = ?", (i,))
+    #     TogruteHarDelstrekning = cursor.fetchall()
+    #     penListe = []
+    #     for x in TogruteHarDelstrekning:
+    #         penListe.append(x[0])
+    #     common_list = set(delstrekningIDFint).intersection(penListe)
+    #     if len(common_list) == len(delstrekningIDFint):
+    #         godkjentTogID.append(i)
 
     cursor.execute(
         '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join 
@@ -144,20 +145,67 @@ def brukerhistorie_g():
         "SELECT * FROM Kunde WHERE Mobilnummer = ?", (tlf,))
 
     resultat = cursor.fetchall()
+    delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
+    delstrekningIDFint = []
+    for i in delstrekninger:
+        delstrekningIDFint.append(i[0])
+
+    opptatteSeter = []
 
     if len(resultat) != 0 and typeBillett == "Sitte":
-        cursor.execute(
-            '''select * from SeteBillettTilhørerDelstrekning natural join 
-            (SELECT * FROM Delstrekning WHERE Startstasjon = ? AND Endestasjon = ?) where 
-            BillettDato = ?''', (startStasjon, sluttStasjon, dato1))
-        resultat = cursor.fetchall()
+        for i in delstrekningIDFint:
+            cursor.execute(
+                '''select StrekningsID, SeteNr, SittevognID from SeteBillettTilhørerDelstrekning 
+                where StrekningsID = ? and BillettDato = ?''', (i, dato1))
+            resultat = cursor.fetchall()
+            for i in resultat:
+                opptatteSeter.append(i)
+    elif len(resultat) != 0 and typeBillett == "Sove":
+        for i in delstrekningIDFint:
+            cursor.execute(
+                '''select Strekningsnavn, KupeeNr, SovevognID from SoveBillettTilhørerDelstrekning 
+                where StrekningsID = ? and BillettDato = ?''', (i, dato1))
+            resultat = cursor.fetchall()
+            for i in resultat:
+                opptatteSeter.append(i)
+    print(opptatteSeter)
 
-    if len(resultat) != 0 and typeBillett == "Sove":
+
+def brukerhistorie_h():
+    tlf = input("Oppgi telefonnummer: ")
+    epost = input("Oppgi epostadresse: ")
+    ordreDato = datetime.date.today()
+
+    cursor.execute(
+        "SELECT * FROM Kundeordre NATURAL JOIN Kunde WHERE Mobilnummer = ? AND Epost = ?", (tlf, epost))
+    resultat = cursor.fetchall()
+    ordreNummer = []
+    for ordre in resultat:
+        ordreNummer.append(ordre[0])
+    print(ordreNummer)
+    billetter = []
+    for i in ordreNummer:
         cursor.execute(
-            '''select * from SoveBillettTilhørerDelstrekning natural join 
-            (SELECT * FROM Delstrekning WHERE Startstasjon = ? AND Endestasjon = ?) where 
-            BillettDato = ?''', (startStasjon, sluttStasjon, dato1))
+            "SELECT * FROM SeteBillett WHERE Ordrenummer = ?", (i,))
         resultat = cursor.fetchall()
+        for i in resultat:
+            billetter.append(i)
+        cursor.execute(
+            "SELECT * FROM SoveBillett WHERE Ordrenummer = ?", (i,))
+        resultat = cursor.fetchall()
+        for i in resultat:
+            billetter.append(i)
+    for i in billetter:
+        if i[1] >= ordreDato:
+            print(i)
+
+    # print(resultat)
+
+
+def printKunder():
+    cursor.execute("SELECT * FROM Kunde")
+    kunder = cursor.fetchall()
+    print(kunder)
 
 
 def buyTicket():
@@ -188,15 +236,35 @@ def buyTicket():
         case 6:
             ukedag1 = "Søndag"
 
-    cursor.execute(
-        "SELECT StrekningsID FROM Delstrekning WHERE Startstasjon = ? AND Endestasjon = ?", (startStasjon, sluttStasjon))
-    strekningsID = cursor.fetchall()[0][0]
-    cursor.execute(
-        "select TogruteID from TogruteForekomst natural join TogruteHarDelstrekning where StrekningsID = ? and Ukedag = ?", (strekningsID, ukedag1))
-    togruteID = cursor.fetchall()[0][0]
+    delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
+    print("Delstrekninger")
+    print(delstrekninger)
+    togruteID = findTogruteID(startStasjon, sluttStasjon)
+    print("TogruteID")
+    print(togruteID)
+    delstrekningIDFint = []
+    for i in delstrekninger:
+        delstrekningIDFint.append(i[0])
+
+    # for i in delstrekningIDFint:
+    # cursor.execute(
+    # "select TogruteID from TogruteForekomst natural join TogruteHarDelstrekning where StrekningsID = ? and Ukedag = ?", (i, ukedag1))
+    # togruteID = cursor.fetchall()[0][0]
+    togruteForekomst = []
+    for i in togruteID:
+        cursor.execute(
+            "select * from TogruteForekomst where TogruteID = ? and Ukedag = ?", (i, ukedag1))
+        togruteForekomst.append(cursor.fetchall()[0])
+    print("TogruteForekomst")
+    print(togruteForekomst)
+
     cursor.execute(
         "SELECT Kundenummer FROM KUNDE WHERE Epost = ?", (e_post,))
-    kundenummer = cursor.fetchall()[0][0]
+    kundenummer = cursor.fetchone()
+    if len(kundenummer) != 0:
+        kundenummer = kundenummer[0]
+    print("Kundenummer")
+    print(kundenummer)
     ordrenummer = 0
     cursor.execute(
         "select Ordrenummer from Kundeordre order by Ordrenummer asc")
@@ -209,12 +277,9 @@ def buyTicket():
     else:
         ordrenummer = ordrenummer1[-1][0]
     ordrenummer += 1
-    cursor.execute(
-        "INSERT INTO Kundeordre VALUES (?, ?, ?, ?, ?, ?, ?)", (ordrenummer, ordreDato, ordreTid, 1, kundenummer, ukedag1, togruteID))
-    con.commit()
     if typeBillett == "Sitte":
         cursor.execute(
-            "select * from SeteBillett")
+            "select * from SeteBillett order by BillettNr asc")
         setebillett = cursor.fetchall()
         setebillettID = 0
         if len(setebillett) == 0:
@@ -225,34 +290,39 @@ def buyTicket():
             setebillettID = setebillett[-1][0]
         setebillettID += 1
 
-        cursor.execute(
-            "insert into SeteBillett values (?, ?, ?, ?, ?, ?, ?)", (setebillettID, billettDato, startStasjon, sluttStasjon, 1, 1, ordrenummer))
-        con.commit()
+        try:
+            for i in delstrekningIDFint:
+                cursor.execute(
+                    "insert into SeteBillettTilhørerDelstrekning values (?, ?, ?, ?, ?, ?, ?)", (i, billettDato, 1, 1, "Nordlandsbanen", setebillettID, ordrenummer))
+                con.commit()
+            cursor.execute(
+                "insert into SeteBillett values (?, ?, ?, ?, ?, ?, ?)", (setebillettID, billettDato, startStasjon, sluttStasjon, 1, 1, ordrenummer))
+            con.commit()
+            cursor.execute(
+                "INSERT INTO Kundeordre VALUES (?, ?, ?, ?, ?, ?, ?)", (ordrenummer, ordreDato, ordreTid, 1, kundenummer, ukedag1, togruteID[0]))
+            con.commit()
+        except sqlite3.Error as error:
+            print("Kunne ikke kjøpe billett")
+            print(error)
+            # cursor.execute(
+            #     "delete from Kundeordre where Ordrenummer = ?", (ordrenummer,))
+            # con.commit()
 
     cursor.execute(
         "SELECT * FROM Kundeordre")
     kundeordre = cursor.fetchall()
+    print("Kundeordre")
     print(kundeordre)
     cursor.execute(
         "SELECT * FROM SeteBillett")
     setebillett = cursor.fetchall()
+    print("Setebillett")
     print(setebillett)
-
-
-def brukerhistorie_h():
-    tlf = input("Oppgi telefonnummer: ")
-    epost = input("Oppgi epostadresse: ")
-
     cursor.execute(
-        "SELECT * FROM Kundeordre NATURAL JOIN Kunde WHERE Mobilnummer = ? AND Epost = ?", (tlf, epost))
-    resultat = cursor.fetchall()
-    print(resultat)
-
-
-def printKunder():
-    cursor.execute("SELECT * FROM Kunde")
-    kunder = cursor.fetchall()
-    print(kunder)
+        "SELECT * FROM SetebillettTilhørerDelstrekning")
+    setebillettTilhørerDelstrekning = cursor.fetchall()
+    print("SetebillettTilhørerDelstrekning")
+    print(setebillettTilhørerDelstrekning)
 
 
 def findDelstrekning(start_station, end_station):
@@ -291,8 +361,37 @@ def findDelstrekning(start_station, end_station):
     return returnList
 
 
+def findTogruteID(startStasjon, sluttStasjon):
+    delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
+    delstrekningIDFint = []
+    for i in delstrekninger:
+        delstrekningIDFint.append(i[0])
+    cursor.execute(
+        "SELECT distinct TogruteID FROM Togrute")
+    togruteID = cursor.fetchall()
+    IDer = []
+    for i in togruteID:
+        IDer.append(i[0])
+    godkjentTogID = []
+    for i in IDer:
+        cursor.execute(
+            "SELECT StrekningsID FROM TogruteHarDelstrekning where TogruteID = ?", (i,))
+        TogruteHarDelstrekning = cursor.fetchall()
+        penListe = []
+        for x in TogruteHarDelstrekning:
+            penListe.append(x[0])
+        common_list = set(delstrekningIDFint).intersection(penListe)
+        if len(common_list) == len(delstrekningIDFint):
+            godkjentTogID.append(i)
+    return godkjentTogID
+
+
 if __name__ == "__main__":
     print("Velkommen til Togtider AS")
-    Brukerhistorie_d()
+    # brukerhistorie_d()
+    # brukerhistorie_h()
+    buyTicket()
+    # brukerhistorie_e()
+    # printKunder()
 
 con.close()
