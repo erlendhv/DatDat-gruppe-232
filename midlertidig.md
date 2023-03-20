@@ -76,3 +76,16 @@ insert into TogruteHarDelstrekning values (3, 30, "Nordlandsbanen");
     # print(avgangs)
 
 insert into SeteBillettTilhørerDelstrekning values (2023-)
+
+    avgangs = []
+    cursor.execute(
+        '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
+        (select * from TogruteTabell natural join
+        (select * from TogruteForekomst where Ukedag = ?))
+        where Avgangstid >= ? and Stasjonsnavn = ?''', (ukedag1, klokkeslett, startStasjon))
+    cursor.execute(
+        '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
+        (select * from TogruteTabell natural join
+        (select * from TogruteForekomst where Ukedag = ?))
+        where Stasjonsnavn = ?''', (ukedag2, startStasjon))
+    avgangs = cursor.fetchall()
