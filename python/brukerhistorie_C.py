@@ -8,10 +8,12 @@ def brukerhistorie_c():
     stasjon = input("Skriv inn stasjon: ")
     dag = input("Skriv inn ukedag: ")
 
-    cursor.execute('''select * from StasjonerITabell natural join 
+    cursor.execute('''select Stasjonsnavn, Avgangstid, Ankomsttid, TogruteID, Ukedag from StasjonerITabell natural join 
                    (select * from Togrutetabell natural join 
                     (select * from TogruteForekomst where Ukedag = ?)) where Stasjonsnavn = ?''', (dag, stasjon))
     forekomster = cursor.fetchall()
-    print(forekomster)
+    print("(Stasjonsnavn, Avgangstid, Ankomsttid, TogruteID, Ukedag))")
+    for forekomst in forekomster:
+        print(forekomst)
 
     con.close()
