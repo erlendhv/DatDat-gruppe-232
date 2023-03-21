@@ -16,6 +16,8 @@ def brukerhistorie_d():
     klokkeslett += ":00"
 
     ukedag1 = dato1.weekday()
+    ukedagSomTall = ukedag1
+
     if ukedag1 == 6:
         ukedag2 = 0
     else:
@@ -81,7 +83,7 @@ def brukerhistorie_d():
         '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
         (select * from TogruteTabell natural join
         (select * from TogruteForekomst where Ukedag = ?))
-        where Avgangstid >= ? and Stasjonsnavn = ?''', (ukedag1, klokkeslett, startStasjon))
+        where Avgangstid >= ? and Stasjonsnavn = ? order by Avgangstid''', (ukedag1, klokkeslett, startStasjon))
     avgangs = cursor.fetchall()
     for i in avgangs:
         avgangsListe.append(i)
@@ -89,7 +91,7 @@ def brukerhistorie_d():
         '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
         (select * from TogruteTabell natural join
         (select * from TogruteForekomst where Ukedag = ?))
-        where Stasjonsnavn = ?''', (ukedag2, startStasjon))
+        where Stasjonsnavn = ? order by Avgangstid''', (ukedag2, startStasjon))
     avgangs = cursor.fetchall()
     for i in avgangs:
         avgangsListe.append(i)
