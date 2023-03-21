@@ -107,8 +107,12 @@ def brukerhistorie_g():
         #               typeBillett, tlf, sittevognID, seteNr, antallBilletter)
         # else:
         for i in range(antallBilletter):
-            seteNrList.append(input("Skriv inn ønsket seteNr: "))
-            sittevognIDList.append(input("Skriv inn ønsket sittevognID: "))
+            seteNrList.append(int(input("Skriv inn ønsket seteNr: ")))
+            sittevognIDList.append(
+                int(input("Skriv inn ønsket sittevognID: ")))
+            if (seteNrList[i], sittevognIDList[i]) not in seterFint:
+                print("Setet er ikke ledig/eksisterer ikke")
+                return
         buyTicket(startStasjon, sluttStasjon, dato_str,
                   typeBillett, tlf, sittevognIDList, seteNrList, antallBilletter)
 
@@ -168,8 +172,11 @@ def brukerhistorie_g():
         #               typeBillett, tlf, sovevognID, kupeeNr, antallBilletter)
         # else:
         for i in range(antallBilletter):
-            kupeeNrList.append(input("Skriv inn ønsket kupeeNr: "))
-            sovevognIDList.append(input("Skriv inn ønsket sovevognID: "))
+            kupeeNrList.append(int(input("Skriv inn ønsket kupeeNr: ")))
+            sovevognIDList.append(int(input("Skriv inn ønsket sovevognID: ")))
+            if (kupeeNrList[i], sovevognIDList[i]) not in kupeerFint:
+                print("Kupee er ikke ledig/eksisterer ikke")
+                return
         buyTicket(startStasjon, sluttStasjon, dato_str,
                   typeBillett, tlf, sovevognIDList, kupeeNrList, antallBilletter)
 
