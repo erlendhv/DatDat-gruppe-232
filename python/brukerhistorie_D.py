@@ -15,70 +15,24 @@ def brukerhistorie_d():
     klokkeslett = input("Angi ønsket klokkeslett (hh:mm): ")
     klokkeslett += ":00"
 
+    # Gjør om dato til ukedag, hvor mandag = 0, tirsdag = 1, osv. Helt til søndag = 6.
     ukedag1 = dato1.weekday()
-    ukedagSomTall = ukedag1
 
+    # Hvis søndag er valgt dag, skal mandag være neste dag, altså lik 0.
     if ukedag1 == 6:
         ukedag2 = 0
     else:
-        ukedag2 = ukedag1 + 1
+        ukedag2 = ukedag1 + 1  # ellers blir neste dag lik ukedag + 1
 
-    match ukedag1:
-        case 0:
-            ukedag1 = "Mandag"
-        case 1:
-            ukedag1 = "Tirsdag"
-        case 2:
-            ukedag1 = "Onsdag"
-        case 3:
-            ukedag1 = "Torsdag"
-        case 4:
-            ukedag1 = "Fredag"
-        case 5:
-            ukedag1 = "Lørdag"
-        case 6:
-            ukedag1 = "Søndag"
+    # hjelpemetoder, finnees i klassen hjelpemetoder.py
+    ukedag1 = toWeekday(ukedag1)
 
-    match ukedag2:
-        case 0:
-            ukedag2 = "Mandag"
-        case 1:
-            ukedag2 = "Tirsdag"
-        case 2:
-            ukedag2 = "Onsdag"
-        case 3:
-            ukedag2 = "Torsdag"
-        case 4:
-            ukedag2 = "Fredag"
-        case 5:
-            ukedag2 = "Lørdag"
-        case 6:
-            ukedag2 = "Søndag"
+    ukedag2 = toWeekday(ukedag2)
 
     godkjentTogID = findTogruteID(startStasjon, sluttStasjon)
-    # delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
-    # delstrekningIDFint = []
-    # for i in delstrekninger:
-    #     delstrekningIDFint.append(i[0])
-    # cursor.execute(
-    #     "SELECT distinct TogruteID FROM Togrute")
-    # togruteID = cursor.fetchall()
-    # IDer = []
-    # for i in togruteID:
-    #     IDer.append(i[0])
-    # godkjentTogID = []
-    # for i in IDer:
-    #     cursor.execute(
-    #         "SELECT StrekningsID FROM TogruteHarDelstrekning where TogruteID = ?", (i,))
-    #     TogruteHarDelstrekning = cursor.fetchall()
-    #     penListe = []
-    #     for x in TogruteHarDelstrekning:
-    #         penListe.append(x[0])
-    #     common_list = set(delstrekningIDFint).intersection(penListe)
-    #     if len(common_list) == len(delstrekningIDFint):
-    #         godkjentTogID.append(i)
 
     avgangsListe = []
+    # Henter alle avganger fra startstasjonen som er etter klokkeslettet og som er på ukedage1.
     cursor.execute(
         '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
         (select * from TogruteTabell natural join
@@ -87,6 +41,8 @@ def brukerhistorie_d():
     avgangs = cursor.fetchall()
     for i in avgangs:
         avgangsListe.append(i)
+
+    # Henter alle avganger fra startstasjonen som er på ukedag2.
     cursor.execute(
         '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
         (select * from TogruteTabell natural join
@@ -96,6 +52,7 @@ def brukerhistorie_d():
     for i in avgangs:
         avgangsListe.append(i)
 
+    # Hvis TogruteID er en togrute som finnes mellom de to stasjonene, printes den.
     print("('Startstasjon', 'Avgangstid', 'TogruteID', 'Ukedag')")
     for i in avgangsListe:
         if i[2] in godkjentTogID:

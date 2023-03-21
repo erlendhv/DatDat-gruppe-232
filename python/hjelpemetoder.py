@@ -46,6 +46,8 @@ def findDelstrekning(start_station, end_station):
 
     return returnList
 
+# finner alle togruter som kjøerer mellom en startstasjon og en sluttstasjon
+
 
 def findTogruteID(startStasjon, sluttStasjon):
     con = sqlite3.connect('232DB.db')
@@ -76,3 +78,25 @@ def findTogruteID(startStasjon, sluttStasjon):
     con.close()
 
     return godkjentTogID
+
+# Gjør om ukedag som nå er int til Mandag, Tirsdag osv.
+
+
+def toWeekday(weekday):
+    ukedag1 = weekday
+    match ukedag1:
+        case 0:
+            ukedag1 = "Mandag"
+        case 1:
+            ukedag1 = "Tirsdag"
+        case 2:
+            ukedag1 = "Onsdag"
+        case 3:
+            ukedag1 = "Torsdag"
+        case 4:
+            ukedag1 = "Fredag"
+        case 5:
+            ukedag1 = "Lørdag"
+        case 6:
+            ukedag1 = "Søndag"
+    return ukedag1

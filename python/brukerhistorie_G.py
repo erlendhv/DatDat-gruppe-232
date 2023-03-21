@@ -7,42 +7,36 @@ def brukerhistorie_g():
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
+    # Finner informasjon om kunden ved oppgitt telefonnummer
     tlf = input("Oppgi telefonnummer: ")
 
     cursor.execute(
         "SELECT * FROM Kunde WHERE Mobilnummer = ?", (tlf,))
 
+    # Sjekker om kunden finnes i databasen
     kundeResultat = cursor.fetchall()
     if len(kundeResultat) == 0:
         print("Det finnes ingen kunder registrert med dette telefonnummeret")
+        con.close()
         return
     startStasjon = input("Skriv inn ønsket startstasjon: ")
     sluttStasjon = input("Skriv inn ønsket sluttstasjon: ")
+
+    # Finner ukedag til dato
     dato_str = input("Angi ønsket dato (YYYY-MM-DD): ")
     year, month, day = map(int, dato_str.split("-"))
     dato1 = datetime.date(year, month, day)
     ukedag1 = dato1.weekday()
-    match ukedag1:
-        case 0:
-            ukedag1 = "Mandag"
-        case 1:
-            ukedag1 = "Tirsdag"
-        case 2:
-            ukedag1 = "Onsdag"
-        case 3:
-            ukedag1 = "Torsdag"
-        case 4:
-            ukedag1 = "Fredag"
-        case 5:
-            ukedag1 = "Lørdag"
-        case 6:
-            ukedag1 = "Søndag"
 
+    ukedag1 = toWeekday(ukedag1)
+
+    # Finner alle delstrekninger mellom start og sluttstasjon
     delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
     delstrekningIDFint = []
     for i in delstrekninger:
         delstrekningIDFint.append(i[0])
 
+    # Finner alle togruter som passer med delstrekningene
     togruteID = findTogruteID(startStasjon, sluttStasjon)
     for i in togruteID:
         cursor.execute(
@@ -57,9 +51,11 @@ def brukerhistorie_g():
     valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
     typeBillett = input("Skriv inn type billett (Sitte/Sove): ")
 
+    # Sjekker om det er ledige sitte-seter på valgt togrute
     if typeBillett == "Sitte":
         opptatteSeter = []
 
+        # Finner alle seter som er opptatt på valgt togrute
         for i in delstrekningIDFint:
             cursor.execute(
                 '''select StrekningsID, SeteNr, SittevognID from SeteBillettTilhørerDelstrekning 
@@ -69,6 +65,7 @@ def brukerhistorie_g():
                 opptatteSeter.append(x)
         cursor.execute('''select * from Sete''')
         seter = cursor.fetchall()
+
         seterFint = []
         cursor.execute(
             '''select SittevognID from BestårAv where TogruteID = ?''', (valgtTogruteID,))
@@ -93,29 +90,31 @@ def brukerhistorie_g():
         print("Ledige seter på formen: ")
         print("(SeteNr, SittevognID)")
         print(seterFint)
-        # Number of tickets to buy
+
+        # Sjekker om det er nok ledige seter på valgt togrute
         antallBilletter = int(input("Skriv inn antall billetter: "))
         if antallBilletter > len(seterFint):
             print("Det er ikke nok ledige seter på dette toget")
+            con.close()
             return
         seteNrList = []
         sittevognIDList = []
-        # if antallBilletter == 1:
-        #     seteNr = input("Skriv inn ønsket seteNr: ")
-        #     sittevognID = input("Skriv inn ønsket sittevognID: ")
-        #     buyTicket(startStasjon, sluttStasjon, dato_str,
-        #               typeBillett, tlf, sittevognID, seteNr, antallBilletter)
-        # else:
+
+        # Sjekker om bruker oppgir gyldige seter
         for i in range(antallBilletter):
             seteNrList.append(int(input("Skriv inn ønsket seteNr: ")))
             sittevognIDList.append(
                 int(input("Skriv inn ønsket sittevognID: ")))
             if (seteNrList[i], sittevognIDList[i]) not in seterFint:
                 print("Setet er ikke ledig/eksisterer ikke")
+                con.close()
                 return
-        buyTicket(startStasjon, sluttStasjon, dato_str,
-                  typeBillett, tlf, sittevognIDList, seteNrList, antallBilletter)
 
+        # Kjøper billett hvis gyldige seter er oppgitt
+        buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
+                  tlf, sittevognIDList, seteNrList, antallBilletter)
+
+    # Tilsvarende som for sitte-seter, bare for sovekupéer
     elif typeBillett == "Sove":
         opptatteKupeer = []
         cursor.execute(
@@ -162,95 +161,54 @@ def brukerhistorie_g():
         antallBilletter = int(input("Skriv inn antall billetter: "))
         if antallBilletter > len(kupeerFint):
             print("Det er ikke nok ledige kupeer på dette toget")
+            con.close()
             return
         kupeeNrList = []
         sovevognIDList = []
-        # if antallBilletter == 1:
-        #     kupeeNr = input("Skriv inn ønsket kupeeNr: ")
-        #     sovevognID = input("Skriv inn ønsket sovevognID: ")
-        #     buyTicket(startStasjon, sluttStasjon, dato_str,
-        #               typeBillett, tlf, sovevognID, kupeeNr, antallBilletter)
-        # else:
+
         for i in range(antallBilletter):
             kupeeNrList.append(int(input("Skriv inn ønsket kupeeNr: ")))
             sovevognIDList.append(int(input("Skriv inn ønsket sovevognID: ")))
             if (kupeeNrList[i], sovevognIDList[i]) not in kupeerFint:
                 print("Kupee er ikke ledig/eksisterer ikke")
+                con.close()
                 return
-        buyTicket(startStasjon, sluttStasjon, dato_str,
-                  typeBillett, tlf, sovevognIDList, kupeeNrList, antallBilletter)
+        buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
+                  tlf, sovevognIDList, kupeeNrList, antallBilletter)
 
-        # kupeeNr = input("Skriv inn ønsket kupeeNr: ")
-        # sovevognID = input("Skriv inn ønsket sovevognID: ")
-        # buyTicket(startStasjon, sluttStasjon, dato_str,
-        #   typeBillett, tlf, sovevognID, kupeeNr, antallBilletter)
     else:
         print("Ugyldig type billett")
 
     con.close()
 
+# Funksjon som kjøper billett
 
-def buyTicket(startStasjon, sluttStasjon, dato_str, typeBillett, tlf, vognID, seteKupeeNr, antallBilletter):
+
+def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vognID, seteKupeeNr, antallBilletter):
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
-    # e_post = input("Skriv inn e-post: ")
-    # startStasjon = input("Skriv inn ønsket startstasjon: ")
-    # sluttStasjon = input("Skriv inn ønsket sluttstasjon: ")
-    # dato_str = input("Angi ønsket dato (YYYY-MM-DD): ")
-    # typeBillett = input("Skriv inn type billett (Sitte/Sove): ")
-    year, month, day = map(int, dato_str.split("-"))
-    billettDato = datetime.date(year, month, day)
+    # Finner dagens dato og tid
+    billettDato = dato1
     ordreDato = datetime.date.today()
     ordreTid = datetime.datetime.now().time()
     ordreTid = ordreTid.strftime("%H:%M:%S")
-    ukedag1 = billettDato.weekday()
-    match ukedag1:
-        case 0:
-            ukedag1 = "Mandag"
-        case 1:
-            ukedag1 = "Tirsdag"
-        case 2:
-            ukedag1 = "Onsdag"
-        case 3:
-            ukedag1 = "Torsdag"
-        case 4:
-            ukedag1 = "Fredag"
-        case 5:
-            ukedag1 = "Lørdag"
-        case 6:
-            ukedag1 = "Søndag"
+    ukedag1 = ukedag1.lower()
 
     delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
-    # print("Delstrekninger")
-    # print(delstrekninger)
+
     togruteID = findTogruteID(startStasjon, sluttStasjon)
-    # print("TogruteID")
-    # print(togruteID)
+
     delstrekningIDFint = []
     for i in delstrekninger:
         delstrekningIDFint.append(i[0])
-
-    # for i in delstrekningIDFint:
-    # cursor.execute(
-    # "select TogruteID from TogruteForekomst natural join TogruteHarDelstrekning where StrekningsID = ? and Ukedag = ?", (i, ukedag1))
-    # togruteID = cursor.fetchall()[0][0]
-    # togruteForekomst = []
-    # for i in togruteID:
-    #     cursor.execute(
-    #         "select * from TogruteForekomst where TogruteID = ? and Ukedag = ?", (i, ukedag1))
-        # print("togruteForekomst")
-        # print(cursor.fetchall())
-    # print("TogruteForekomst")
-    # print(togruteForekomst)
 
     cursor.execute(
         "SELECT Kundenummer FROM KUNDE WHERE Mobilnummer = ?", (tlf,))
     kundenummer = cursor.fetchone()
     if len(kundenummer) != 0:
         kundenummer = kundenummer[0]
-    # print("Kundenummer")
-    # print(kundenummer)
+
     ordrenummer = 0
     cursor.execute(
         "select Ordrenummer from Kundeordre order by Ordrenummer asc")
@@ -281,18 +239,6 @@ def buyTicket(startStasjon, sluttStasjon, dato_str, typeBillett, tlf, vognID, se
         antallBilletkjøp = antallBilletter
 
         try:
-            # if antallBilletkjøp == 1:
-            #     for i in delstrekningIDFint:
-            #         cursor.execute(
-            #             "insert into SeteBillettTilhørerDelstrekning values (?, ?, ?, ?, ?, ?, ?)", (i, billettDato, seteNr, sittevognID, "Nordlandsbanen", setebillettID, ordrenummer))
-            #         con.commit()
-            #     cursor.execute(
-            #         "insert into SeteBillett values (?, ?, ?, ?, ?, ?, ?)", (setebillettID, billettDato, startStasjon, sluttStasjon, seteNr, sittevognID, ordrenummer))
-            #     con.commit()
-            #     cursor.execute(
-            #         "INSERT INTO Kundeordre VALUES (?, ?, ?, ?, ?, ?, ?)", (ordrenummer, ordreDato, ordreTid, antallBilletkjøp, kundenummer, ukedag1, togruteID[0]))
-            #     con.commit()
-            # else:
             for x in range(int(antallBilletkjøp)):
                 for i in delstrekningIDFint:
                     cursor.execute(
@@ -309,9 +255,6 @@ def buyTicket(startStasjon, sluttStasjon, dato_str, typeBillett, tlf, vognID, se
         except sqlite3.Error as error:
             print("Kunne ikke kjøpe billett")
             print(error)
-            # cursor.execute(
-            #     "delete from Kundeordre where Ordrenummer = ?", (ordrenummer,))
-            # con.commit()
     elif typeBillett == "Sove":
         cursor.execute(
             "select * from SoveBillett order by BillettNr asc")
@@ -330,18 +273,6 @@ def buyTicket(startStasjon, sluttStasjon, dato_str, typeBillett, tlf, vognID, se
         antallBilletkjøp = antallBilletter
 
         try:
-            # for i in delstrekningIDFint:
-            # if antallBilletkjøp == 1:
-            #     cursor.execute(
-            #         "insert into SoveBillettTilhørerBanestrekning values (?, ?, ?, ?, ?, ?)", (billettDato, KupeeNr, SovevognID, "Nordlandsbanen", sovebillettID, ordrenummer))
-            #     con.commit()
-            #     cursor.execute(
-            #         "insert into SoveBillett values (?, ?, ?, ?, ?, ?, ?)", (sovebillettID, billettDato, startStasjon, sluttStasjon, KupeeNr, SovevognID, ordrenummer))
-            #     con.commit()
-            #     cursor.execute(
-            #         "INSERT INTO Kundeordre VALUES (?, ?, ?, ?, ?, ?, ?)", (ordrenummer, ordreDato, ordreTid, antallBilletkjøp, kundenummer, ukedag1, togruteID[0]))
-            #     con.commit()
-            # else:
             for x in range(antallBilletkjøp):
                 cursor.execute(
                     "insert into SoveBillettTilhørerBanestrekning values (?, ?, ?, ?, ?, ?)", (billettDato, KupeeNr[x], SovevognID[x], "Nordlandsbanen", sovebillettID, ordrenummer))
@@ -358,8 +289,5 @@ def buyTicket(startStasjon, sluttStasjon, dato_str, typeBillett, tlf, vognID, se
         except sqlite3.Error as error:
             print("Kunne ikke kjøpe billett")
             print(error)
-            # cursor.execute(
-            #     "delete from Kundeordre where Ordrenummer = ?", (ordrenummer,))
-            # con.commit()
 
     con.close()

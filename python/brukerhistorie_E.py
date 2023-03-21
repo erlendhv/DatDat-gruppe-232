@@ -1,5 +1,4 @@
 import sqlite3
-from collections import deque
 
 
 def brukerhistorie_e():
@@ -10,6 +9,8 @@ def brukerhistorie_e():
     cursor.execute("select Kundenummer from Kunde order by Kundenummer asc")
     Kundenummer1 = cursor.fetchall()
 
+    # Henter kundenumemret til den siste kunden i databasen og legger til 1 for å gi
+    # dette kundenummeret til den nye kunden
     if len(Kundenummer1) == 0:
         Kundenummer = 0
     elif len(Kundenummer1) == 1:
@@ -21,6 +22,7 @@ def brukerhistorie_e():
     Epost = input("Skriv inn E-post: ")
     Mobilnummer = input("Skriv inn mobilnummer: ")
 
+    # Legger til kunden i databasen
     try:
         cursor.execute('''INSERT INTO Kunde VALUES (?, ?, ?, ?)''',
                        (Kundenummer, Kundenavn, Epost, Mobilnummer))

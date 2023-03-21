@@ -8,6 +8,8 @@ def brukerhistorie_c():
     stasjon = input("Skriv inn stasjon: ")
     dag = input("Skriv inn ukedag: ")
 
+    # tar natural join på StasjonerITabell, TogruteTabell og Togruteforekomst hvor ukedag i TogruteForekomst
+    # er oppgitt ukedag og Stasjonsnavn i StasjonerITabell er oppgitt stasjon.
     cursor.execute('''select Stasjonsnavn, Avgangstid, Ankomsttid, TogruteID, Ukedag from StasjonerITabell natural join 
                    (select * from Togrutetabell natural join 
                     (select * from TogruteForekomst where Ukedag = ?)) where Stasjonsnavn = ?''', (dag, stasjon))
