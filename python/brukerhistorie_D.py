@@ -76,16 +76,26 @@ def brukerhistorie_d():
     #     if len(common_list) == len(delstrekningIDFint):
     #         godkjentTogID.append(i)
 
+    avgangsListe = []
     cursor.execute(
-        '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join 
-        (select * from TogruteTabell natural join 
-        (select * from TogruteForekomst where Ukedag = ? or Ukedag = ?)) 
-        where Avgangstid >= ? and Stasjonsnavn = ?''', (ukedag1, ukedag2, klokkeslett, startStasjon))
-
+        '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
+        (select * from TogruteTabell natural join
+        (select * from TogruteForekomst where Ukedag = ?))
+        where Avgangstid >= ? and Stasjonsnavn = ?''', (ukedag1, klokkeslett, startStasjon))
     avgangs = cursor.fetchall()
+    for i in avgangs:
+        avgangsListe.append(i)
+    cursor.execute(
+        '''select Stasjonsnavn, Avgangstid, TogruteID, Ukedag from StasjonerITabell natural join
+        (select * from TogruteTabell natural join
+        (select * from TogruteForekomst where Ukedag = ?))
+        where Stasjonsnavn = ?''', (ukedag2, startStasjon))
+    avgangs = cursor.fetchall()
+    for i in avgangs:
+        avgangsListe.append(i)
 
     print("('Startstasjon', 'Avgangstid', 'TogruteID', 'Ukedag')")
-    for i in avgangs:
+    for i in avgangsListe:
         if i[2] in godkjentTogID:
             print(i)
 

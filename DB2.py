@@ -11,9 +11,10 @@ from python.brukerhistorie_H import brukerhistorie_h
 
 if __name__ == "__main__":
     print("Velkommen til Togtider AS")
-    # brukerhistorie_d()
+    brukerhistorie_d()
     # brukerhistorie_c()
-    brukerhistorie_e()
+    # brukerhistorie_e()
+    # brukerhistorie_g()
 
     # cursor.execute(
     #     "SELECT * FROM Kundeordre")
