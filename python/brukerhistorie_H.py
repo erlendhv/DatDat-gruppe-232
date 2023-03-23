@@ -7,16 +7,15 @@ def brukerhistorie_h():
     cursor = con.cursor()
 
     tlf = input("Oppgi telefonnummer: ")
-    epost = input("Oppgi epostadresse: ")
     currentDato = datetime.date.today()
 
     # Henter ut kundeordre for kunden som har oppgitt telefonnummer og epost
     cursor.execute(
-        "SELECT * FROM Kundeordre NATURAL JOIN Kunde WHERE Mobilnummer = ? AND Epost = ?", (tlf, epost))
+        "SELECT * FROM Kundeordre NATURAL JOIN Kunde WHERE Mobilnummer = ?", (tlf, ))
     resultat = cursor.fetchall()
     if len(resultat) == 0:
         con.close()
-        return print("Fant ingen kundeordre for kunden med tlf: " + tlf + " og epost: " + epost)
+        return print("Fant ingen kundeordre for kunden med tlf: " + tlf)
     print("Kundeordrer for denne kunden: ")
     for i in resultat:
         print(i)
