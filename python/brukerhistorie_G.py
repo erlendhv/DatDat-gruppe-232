@@ -46,13 +46,19 @@ def brukerhistorie_g():
 
     # Finner alle togruter som passer med delstrekningene
     togruteID = findTogruteID(startStasjon, sluttStasjon)
+    if len(togruteID) == 0:
+        print("Det finnes ingen rute mellom disse stasjonene")
+        con.close()
+        return
+    print("Skriv inn ønsket TogruteID fra listen under på formen")
+    print("(Startstasjon, TogruteID, AvgangsTid)")
     for i in togruteID:
         cursor.execute(
             '''select * from TogruteForekomst where TogruteID = ? and Ukedag = ?''', (i, ukedag1))
         valid = cursor.fetchall()
         if len(valid) != 0:
             cursor.execute(
-                '''select * from stasjoneritabell where 
+                '''select Stasjonsnavn, TogruteTabellID, Avgangstid from stasjoneritabell where 
                 (togrutetabellid = ?) and stasjonsnavn = ?''', (i, startStasjon))
             print(cursor.fetchall())
 
