@@ -41,6 +41,8 @@ def findDelstrekning(start_station, end_station):
             returnList.append(cursor.fetchall()[0])
     except:
         print("Det finnes ingen delstrekninger mellom disse stasjonene")
+        con.close()
+        return []
 
     con.close()
 
@@ -54,6 +56,8 @@ def findTogruteID(startStasjon, sluttStasjon):
     cursor = con.cursor()
 
     delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
+    if len(delstrekninger) == 0:
+        return []
     delstrekningIDFint = []
     for i in delstrekninger:
         delstrekningIDFint.append(i[0])

@@ -32,6 +32,10 @@ def brukerhistorie_g():
 
     # Finner alle delstrekninger mellom start og sluttstasjon
     delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
+    if len(delstrekninger) == 0:
+        print("Det finnes ingen rute mellom disse stasjonene")
+        con.close()
+        return
     delstrekningIDFint = []
     for i in delstrekninger:
         delstrekningIDFint.append(i[0])
@@ -89,7 +93,8 @@ def brukerhistorie_g():
             seterFint.remove(i)
         print("Ledige seter på formen: ")
         print("(SeteNr, SittevognID)")
-        print(seterFint)
+        for i in seterFint:
+            print(i)
 
         # Sjekker om det er nok ledige seter på valgt togrute
         antallBilletter = int(input("Skriv inn antall billetter: "))
@@ -157,7 +162,8 @@ def brukerhistorie_g():
 
         print("Ledige kupeer på formen: ")
         print("(KupeeNr, SovevognID)")
-        print(kupeerFint)
+        for i in kupeerFint:
+            print(i)
         antallBilletter = int(input("Skriv inn antall billetter: "))
         if antallBilletter > len(kupeerFint):
             print("Det er ikke nok ledige kupeer på dette toget")

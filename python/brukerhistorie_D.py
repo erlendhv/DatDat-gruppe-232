@@ -30,6 +30,9 @@ def brukerhistorie_d():
     ukedag2 = toWeekday(ukedag2)
 
     godkjentTogID = findTogruteID(startStasjon, sluttStasjon)
+    if len(godkjentTogID) == 0:
+        print("Fant ingen togruter mellom de to stasjonene.")
+        return
 
     avgangsListe = []
     # Henter alle avganger fra startstasjonen som er etter klokkeslettet og som er på ukedage1.

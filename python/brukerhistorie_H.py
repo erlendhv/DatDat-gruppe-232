@@ -14,6 +14,9 @@ def brukerhistorie_h():
     cursor.execute(
         "SELECT * FROM Kundeordre NATURAL JOIN Kunde WHERE Mobilnummer = ? AND Epost = ?", (tlf, epost))
     resultat = cursor.fetchall()
+    if len(resultat) == 0:
+        con.close()
+        return print("Fant ingen kundeordre for kunden med tlf: " + tlf + " og epost: " + epost)
     print("Kundeordrer for denne kunden: ")
     for i in resultat:
         print(i)
@@ -34,7 +37,7 @@ def brukerhistorie_h():
         resultat = cursor.fetchall()
         for z in resultat:
             billetter.append(z)
-    print("Billetter for denne kunden: ")
+    print("Kommende billetter for denne kunden: ")
     print("(BillettNr, BillettDato, Startstasjon, Endestasjon, KupeeNr/SeteNr, VognID, Ordrenummer)")
     for i in billetter:
         if datetime.datetime.strptime(i[1], '%Y-%m-%d').date() >= currentDato:

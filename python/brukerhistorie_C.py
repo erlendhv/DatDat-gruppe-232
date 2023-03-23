@@ -14,6 +14,9 @@ def brukerhistorie_c():
                    (select * from Togrutetabell natural join 
                     (select * from TogruteForekomst where Ukedag = ?)) where Stasjonsnavn = ?''', (dag, stasjon))
     forekomster = cursor.fetchall()
+    if len(forekomster) == 0:
+        con.close()
+        return print("Fant ingen forekomster for stasjonen " + stasjon + " på ukedag " + dag)
     print("(Stasjonsnavn, Avgangstid, Ankomsttid, TogruteID, Ukedag))")
     for forekomst in forekomster:
         print(forekomst)
