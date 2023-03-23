@@ -7,8 +7,25 @@ from python.brukerhistorie_H import brukerhistorie_h
 # For å teste en brukerhistorie, fjern kommentar på den du ønsker å teste
 if __name__ == "__main__":
     print("Velkommen til Togtider AS")
-    # brukerhistorie_c()
-    # brukerhistorie_d()
-    # brukerhistorie_e()
-    # brukerhistorie_g()
-    # brukerhistorie_h()
+    print("Hva ønsker du å gjøre?")
+    print("1. brukehistorie_c")
+    print("2. brukerhistorie_d")
+    print("3. brukerhistorie_e")
+    print("4. brukerhistorie_g")
+    print("5. brukerhistorie_h")
+    print("6. Avslutt")
+    valg = input("Skriv inn ditt valg: ")
+    if valg == "1":
+        brukerhistorie_c()
+    elif valg == "2":
+        brukerhistorie_d()
+    elif valg == "3":
+        brukerhistorie_e()
+    elif valg == "4":
+        brukerhistorie_g()
+    elif valg == "5":
+        brukerhistorie_h()
+    elif valg == "6":
+        exit()
+    else:
+        print("Ugyldig valg")

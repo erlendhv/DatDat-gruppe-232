@@ -83,8 +83,8 @@ def findTogruteID(startStasjon, sluttStasjon):
 
     return godkjentTogID
 
-# Gjør om ukedag som nå er int til Mandag, Tirsdag osv.
 
+# Gjør om ukedag som nå er int til Mandag, Tirsdag osv.
 
 def toWeekday(weekday):
     ukedag1 = weekday
