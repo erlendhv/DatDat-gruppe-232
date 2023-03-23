@@ -24,6 +24,10 @@ def brukerhistorie_g():
 
     # Finner ukedag til dato
     dato_str = input("Angi ønsket dato (YYYY-MM-DD): ")
+    if startStasjon == "" or sluttStasjon == "" or dato_str == "":
+        print("Du må fylle ut alle feltene")
+        con.close()
+        return
     year, month, day = map(int, dato_str.split("-"))
     dato1 = datetime.date(year, month, day)
     ukedag1 = dato1.weekday()
@@ -53,7 +57,12 @@ def brukerhistorie_g():
             print(cursor.fetchall())
 
     valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
+    while valgtTogruteID == "":
+        valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
+
     typeBillett = input("Skriv inn type billett (Sitte/Sove): ")
+    while typeBillett == "":
+        typeBillett = input("Skriv inn type billett (Sitte/Sove): ")
 
     # Sjekker om det er ledige sitte-seter på valgt togrute
     if typeBillett == "Sitte":
@@ -104,12 +113,22 @@ def brukerhistorie_g():
             return
         seteNrList = []
         sittevognIDList = []
+        kjøpt = []
 
         # Sjekker om bruker oppgir gyldige seter
         for i in range(antallBilletter):
-            seteNrList.append(int(input("Skriv inn ønsket seteNr: ")))
-            sittevognIDList.append(
-                int(input("Skriv inn ønsket sittevognID: ")))
+            seteNr = int(input("Skriv inn ønsket seteNr: "))
+            sittevognID = int(input("Skriv inn ønsket sittevognID: "))
+
+            while (seteNr, sittevognID) in kjøpt:
+                print("Setet er allerede valgt")
+                seteNr = int(input("Skriv inn ønsket seteNr: "))
+                sittevognID = int(input("Skriv inn ønsket sittevognID: "))
+
+            seteNrList.append(seteNr)
+            sittevognIDList.append(sittevognID)
+            kjøpt.append((seteNr, sittevognID))
+
             if (seteNrList[i], sittevognIDList[i]) not in seterFint:
                 print("Setet er ikke ledig/eksisterer ikke")
                 con.close()
@@ -171,10 +190,21 @@ def brukerhistorie_g():
             return
         kupeeNrList = []
         sovevognIDList = []
+        kjøpt = []
 
         for i in range(antallBilletter):
-            kupeeNrList.append(int(input("Skriv inn ønsket kupeeNr: ")))
-            sovevognIDList.append(int(input("Skriv inn ønsket sovevognID: ")))
+            kupeeNr = int(input("Skriv inn ønsket kupeeNr: "))
+            sovevognID = int(input("Skriv inn ønsket sovevognID: "))
+
+            while (kupeeNr, sovevognID) in kjøpt:
+                print("Kupee er allerede valgt")
+                kupeeNr = int(input("Skriv inn ønsket kupeeNr: "))
+                sovevognID = int(input("Skriv inn ønsket sovevognID: "))
+
+            kupeeNrList.append(kupeeNr)
+            sovevognIDList.append(sovevognID)
+            kjøpt.append((kupeeNr, sovevognID))
+
             if (kupeeNrList[i], sovevognIDList[i]) not in kupeerFint:
                 print("Kupee er ikke ledig/eksisterer ikke")
                 con.close()
