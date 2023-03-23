@@ -9,7 +9,7 @@ from python.brukerhistorie_H import brukerhistorie_h
 if __name__ == "__main__":
     print("Velkommen til Togtider AS")
     print("Hva ønsker du å gjøre?")
-    print("1. brukehistorie_c")
+    print("1. brukerhistorie_c")
     print("2. brukerhistorie_d")
     print("3. brukerhistorie_e")
     print("4. brukerhistorie_g")
