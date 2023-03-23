@@ -15,8 +15,8 @@ def brukerhistorie_h():
     resultat = cursor.fetchall()
     if len(resultat) == 0:
         con.close()
-        return print("Fant ingen kundeordre for kunden med tlf: " + tlf)
-    print("Kundeordrer for denne kunden: ")
+        return print("Fant ingen bestillinger for kunden med tlf: " + tlf)
+    print("Alle kundeordrer for denne kunden: ")
     for i in resultat:
         print(i)
 

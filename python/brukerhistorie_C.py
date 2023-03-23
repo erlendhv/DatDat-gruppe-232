@@ -17,7 +17,7 @@ def brukerhistorie_c():
     if len(forekomster) == 0:
         con.close()
         return print("Fant ingen forekomster for stasjonen " + stasjon + " på ukedag " + dag)
-    print("(Stasjonsnavn, Avgangstid, Ankomsttid, TogruteID, Ukedag))")
+    print("(Stasjonsnavn, Avgangstid, Ankomsttid, TogruteID, Ukedag)")
     for forekomst in forekomster:
         print(forekomst)
 
