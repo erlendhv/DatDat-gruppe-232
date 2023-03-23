@@ -8,6 +8,7 @@ from python.brukerhistorie_H import brukerhistorie_h
 
 if __name__ == "__main__":
     while True:
+        print("=============================================================")
         print("Velkommen til Togtider AS")
         print("Hva ønsker du å gjøre?")
         print("1. brukerhistorie_c: Se info om togrute innom en stasjon")
