@@ -40,9 +40,10 @@ def brukerhistorie_g():
         print("Det finnes ingen rute mellom disse stasjonene")
         con.close()
         return
-    delstrekningIDFint = []
+    # En liste med Id til alle delstrekninger til valgt rute
+    delstrekningID = []
     for i in delstrekninger:
-        delstrekningIDFint.append(i[0])
+        delstrekningID.append(i[0])
 
     # Finner alle togruter som passer med delstrekningene
     togruteID = findTogruteID(startStasjon, sluttStasjon)
@@ -63,8 +64,12 @@ def brukerhistorie_g():
             print(cursor.fetchall())
 
     valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
-    while valgtTogruteID == "":
+    # Denne løkken passer på at brukeren skriver inn en gyldig TogruteID
+    while valgtTogruteID == "" or not valgtTogruteID.isnumeric():
         valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
+    cursor.execute(
+        '''select Strekningsnavn from Togrute where TogruteID = ?''', (valgtTogruteID,))
+    strekningsnavn = cursor.fetchall()[0][0]
 
     typeBillett = input("Skriv inn type billett (Sitte/Sove): ")
     while typeBillett == "":
@@ -75,7 +80,7 @@ def brukerhistorie_g():
         opptatteSeter = []
 
         # Finner alle seter som er opptatt på valgt togrute
-        for i in delstrekningIDFint:
+        for i in delstrekningID:
             cursor.execute(
                 '''select StrekningsID, SeteNr, SittevognID from SeteBillettTilhørerDelstrekning 
                 where StrekningsID = ? and BillettDato = ?''', (i, dato1))
@@ -85,35 +90,39 @@ def brukerhistorie_g():
         cursor.execute('''select * from Sete''')
         seter = cursor.fetchall()
 
-        seterFint = []
         cursor.execute(
             '''select SittevognID from BestårAv where TogruteID = ?''', (valgtTogruteID,))
         vogner = cursor.fetchall()
-        vognFint = []
+        # Liste over ID til alle vogner på valgt togrute
+        vognIDList = []
         for i in vogner:
-            vognFint.append(i[0])
-        if len(vognFint) == 0:
+            vognIDList.append(i[0])
+        if len(vognIDList) == 0:
             print("Det er ingen passende vogner på valgt togrute")
             return
+        ledigeSeterList = []
+        # Finner alle ledige seter på valgt togrute
         for i in seter:
-            if i[1] in vognFint:
-                seterFint.append(i)
-        fjern = []
-        for i in seterFint:
+            if i[1] in vognIDList:
+                ledigeSeterList.append(i)
+        fjernPlasser = []
+        # Finner alle opptatte seter på valgt togrute
+        for i in ledigeSeterList:
             for x in opptatteSeter:
                 if i[0] == x[1] and i[1] == x[2]:
-                    fjern.append(i)
-        fjern = set(fjern)
-        for i in fjern:
-            seterFint.remove(i)
+                    fjernPlasser.append(i)
+        fjernPlasser = set(fjernPlasser)
+        # Fjerner alle opptatte seter fra listen over ledige seter
+        for i in fjernPlasser:
+            ledigeSeterList.remove(i)
         print("Ledige seter på formen: ")
         print("(SeteNr, SittevognID)")
-        for i in seterFint:
+        for i in ledigeSeterList:
             print(i)
 
         # Sjekker om det er nok ledige seter på valgt togrute
         antallBilletter = int(input("Skriv inn antall billetter: "))
-        if antallBilletter > len(seterFint):
+        if antallBilletter > len(ledigeSeterList):
             print("Det er ikke nok ledige seter på dette toget")
             con.close()
             return
@@ -121,11 +130,12 @@ def brukerhistorie_g():
         sittevognIDList = []
         kjøpt = []
 
-        # Sjekker om bruker oppgir gyldige seter
+        # Spør bruker om ønsket seter
         for i in range(antallBilletter):
             seteNr = int(input("Skriv inn ønsket seteNr: "))
             sittevognID = int(input("Skriv inn ønsket sittevognID: "))
 
+            # Sjekker om bruker oppgir gyldige seter
             while (seteNr, sittevognID) in kjøpt:
                 print("Setet er allerede valgt")
                 seteNr = int(input("Skriv inn ønsket seteNr: "))
@@ -135,20 +145,20 @@ def brukerhistorie_g():
             sittevognIDList.append(sittevognID)
             kjøpt.append((seteNr, sittevognID))
 
-            if (seteNrList[i], sittevognIDList[i]) not in seterFint:
+            if (seteNrList[i], sittevognIDList[i]) not in ledigeSeterList:
                 print("Setet er ikke ledig/eksisterer ikke")
                 con.close()
                 return
 
         # Kjøper billett hvis gyldige seter er oppgitt
         buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
-                  tlf, sittevognIDList, seteNrList, antallBilletter)
+                  tlf, sittevognIDList, seteNrList, antallBilletter, strekningsnavn)
 
     # Tilsvarende som for sitte-seter, bare for sovekupéer
     elif typeBillett == "Sove":
         opptatteKupeer = []
         cursor.execute(
-            '''select Strekningsnavn from Delstrekning where StrekningsID = ?''', (delstrekningIDFint[0],))
+            '''select Strekningsnavn from Delstrekning where StrekningsID = ?''', (delstrekningID[0],))
         resultat = cursor.fetchone()
         cursor.execute(
             '''select Strekningsnavn, KupeeNr, SovevognID from SoveBillettTilhørerBanestrekning 
@@ -162,11 +172,11 @@ def brukerhistorie_g():
         cursor.execute(
             '''select SovevognID from BestårAv where TogruteID = ?''', (valgtTogruteID,))
         vogner = cursor.fetchall()
-        vognFint = []
+        vognIDList = []
         for i in vogner:
-            vognFint.append(i[0])
+            vognIDList.append(i[0])
         vogner = []
-        for i in vognFint:
+        for i in vognIDList:
             if i != None:
                 vogner.append(i)
 
@@ -174,15 +184,15 @@ def brukerhistorie_g():
             print("Det er ingen passende vogner på valgt togrute")
             return
         for i in kupeer:
-            if i[1] in vognFint:
+            if i[1] in vognIDList:
                 kupeerFint.append(i)
-        fjern = []
+        fjernPlasser = []
         for i in kupeerFint:
             for x in opptatteKupeer:
                 if i[0] == x[1] and i[1] == x[2]:
-                    fjern.append(i)
-        fjern = set(fjern)
-        for i in fjern:
+                    fjernPlasser.append(i)
+        fjernPlasser = set(fjernPlasser)
+        for i in fjernPlasser:
             kupeerFint.remove(i)
 
         print("Ledige kupeer på formen: ")
@@ -216,17 +226,17 @@ def brukerhistorie_g():
                 con.close()
                 return
         buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
-                  tlf, sovevognIDList, kupeeNrList, antallBilletter)
+                  tlf, sovevognIDList, kupeeNrList, antallBilletter, strekningsnavn)
 
     else:
         print("Ugyldig type billett")
 
     con.close()
 
-# Funksjon som kjøper billett
+# Funksjon som kjøper valgt billett
 
 
-def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vognID, seteKupeeNr, antallBilletter):
+def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vognID, seteKupeeNr, antallBilletter, strekningsnavn):
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
@@ -241,9 +251,9 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
 
     togruteID = findTogruteID(startStasjon, sluttStasjon)
 
-    delstrekningIDFint = []
+    delstrekningID = []
     for i in delstrekninger:
-        delstrekningIDFint.append(i[0])
+        delstrekningID.append(i[0])
 
     cursor.execute(
         "SELECT Kundenummer FROM KUNDE WHERE Mobilnummer = ?", (tlf,))
@@ -256,6 +266,7 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
         "select Ordrenummer from Kundeordre order by Ordrenummer asc")
     ordrenummer1 = cursor.fetchall()
 
+    # Finner ordrenummeret til den nye ordren
     if len(ordrenummer1) == 0:
         ordrenummer = 0
     elif len(ordrenummer1) == 1:
@@ -268,6 +279,7 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
             "select * from SeteBillett order by BillettNr asc")
         setebillett = cursor.fetchall()
         setebillettID = 0
+        # Finner setebillettID til den nye setebilletten
         if len(setebillett) == 0:
             setebillettID = 0
         elif len(setebillett) == 1:
@@ -282,9 +294,9 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
 
         try:
             for x in range(int(antallBilletkjøp)):
-                for i in delstrekningIDFint:
+                for i in delstrekningID:
                     cursor.execute(
-                        "insert into SeteBillettTilhørerDelstrekning values (?, ?, ?, ?, ?, ?, ?)", (i, billettDato, seteNr[x], sittevognID[x], "Nordlandsbanen", setebillettID, ordrenummer))
+                        "insert into SeteBillettTilhørerDelstrekning values (?, ?, ?, ?, ?, ?, ?)", (i, billettDato, seteNr[x], sittevognID[x], strekningsnavn, setebillettID, ordrenummer))
                     con.commit()
                 cursor.execute(
                     "insert into SeteBillett values (?, ?, ?, ?, ?, ?, ?)", (setebillettID, billettDato, startStasjon, sluttStasjon, seteNr[x], sittevognID[x], ordrenummer))
@@ -317,7 +329,7 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
         try:
             for x in range(antallBilletkjøp):
                 cursor.execute(
-                    "insert into SoveBillettTilhørerBanestrekning values (?, ?, ?, ?, ?, ?)", (billettDato, KupeeNr[x], SovevognID[x], "Nordlandsbanen", sovebillettID, ordrenummer))
+                    "insert into SoveBillettTilhørerBanestrekning values (?, ?, ?, ?, ?, ?)", (billettDato, KupeeNr[x], SovevognID[x], strekningsnavn, sovebillettID, ordrenummer))
                 con.commit()
                 cursor.execute(
                     "insert into SoveBillett values (?, ?, ?, ?, ?, ?, ?)", (sovebillettID, billettDato, startStasjon, sluttStasjon, KupeeNr[x], SovevognID[x], ordrenummer))
