@@ -1,8 +1,14 @@
 import sqlite3
 from collections import deque
+import re
 
 
 def findDelstrekning(start_station, end_station):
+    '''
+        Dette er en hjelpemetode som finner alle delstrekninger mellom to stasjoner. Den gjør det ved hjelp av 
+        en bredde-først-søk (BFS) algoritme. Den tar inn startstasjon og endestasjon, og returnerer en liste
+        med korteste mulige rute mellom de to stasjonene.
+    '''
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
@@ -52,6 +58,11 @@ def findDelstrekning(start_station, end_station):
 
 
 def findTogruteID(startStasjon, sluttStasjon):
+    '''
+    Dette er en hjelpemetode som finner alle togruter som kjører mellom to stasjoner. Den gjør det ved hjelp av
+    funksjonen over for å finne alle delstrekninger mellom to stasjoner, og så sjekker den hvilke togruter som
+    har disse delstrekningene.
+    '''
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
@@ -84,23 +95,67 @@ def findTogruteID(startStasjon, sluttStasjon):
     return godkjentTogID
 
 
-# Gjør om ukedag som nå er int til Mandag, Tirsdag osv.
-
 def toWeekday(weekday):
+    '''
+    Dette er en hjelpemetode som gjør om ukedag i int til ukedag i string.
+    '''
     ukedag1 = weekday
     match ukedag1:
         case 0:
-            ukedag1 = "Mandag"
+            ukedag1 = "mandag"
         case 1:
-            ukedag1 = "Tirsdag"
+            ukedag1 = "tirsdag"
         case 2:
-            ukedag1 = "Onsdag"
+            ukedag1 = "onsdag"
         case 3:
-            ukedag1 = "Torsdag"
+            ukedag1 = "torsdag"
         case 4:
-            ukedag1 = "Fredag"
+            ukedag1 = "fredag"
         case 5:
-            ukedag1 = "Lørdag"
+            ukedag1 = "lørdag"
         case 6:
-            ukedag1 = "Søndag"
+            ukedag1 = "søndag"
     return ukedag1
+
+
+def validJernbanestasjon(stasjonsnavnInput):
+    '''
+    Dette er en hjelpemetode som henter ut alle jernbanestasjonene i databasen.
+    Den sjekker så om stasjonsnavnet som brukeren har skrevet inn er gyldig.
+    Hvis det er gyldig, returneres stasjonsnavnet. Hvis ikke, får brukeren skrive inn stasjonsnavnet på nytt.
+    '''
+    con = sqlite3.connect('232DB.db')
+    cursor = con.cursor()
+
+    cursor.execute("select Stasjonsnavn from Jernbanestasjon")
+    stasjoner = cursor.fetchall()
+
+    stasjonsnavn = []
+    for stasjon in stasjoner:
+        stasjonsnavn.append(stasjon[0])
+
+    while stasjonsnavnInput not in stasjonsnavn:
+        print("Ugyldig stasjonsnavn")
+        print("Eksisterende stasjoner: ")
+        for stasjon in stasjoner:
+            print(stasjon[0])
+        stasjonsnavnInput = input("Skriv inn stasjonsnavn på nytt: ")
+
+    con.close()
+
+    return stasjonsnavnInput
+
+
+def dateCheck(dato):
+    '''
+    Dette er en hjelpemetode som sjekker om datoen som brukeren har skrevet inn er på gyldig format.
+    Den sjekker om det er 4 siffer, bindestrek og 2 siffer, bindestrek og 2 siffer.
+    Hvis den er gyldig, returneres datoen. Hvis ikke, får brukeren skrive inn datoen på nytt.
+    '''
+    date_regex = r'^\d{4}-\d{2}-\d{2}$'
+    match = re.match(date_regex, dato)
+    while not match:
+        print("Feil format på dato. Prøv igjen.")
+        dato = input("Angi ønsket dato (YYYY-MM-DD): ")
+        match = re.match(date_regex, dato)
+    return dato

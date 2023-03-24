@@ -78,23 +78,23 @@ insert into StasjonerITabell values ("Steinkjer", 3, "12:31:00", "12:31:00");
 insert into StasjonerITabell values ("Trondheim S", 3, null, "14:13:00");
 
 #TogruteForekomst
-insert into TogruteForekomst values ("Mandag", 1);
-insert into TogruteForekomst values ("Tirsdag", 1);
-insert into TogruteForekomst values ("Onsdag", 1);
-insert into TogruteForekomst values ("Torsdag", 1);
-insert into TogruteForekomst values ("Fredag", 1);
-insert into TogruteForekomst values ("Mandag", 2);
-insert into TogruteForekomst values ("Tirsdag", 2);
-insert into TogruteForekomst values ("Onsdag", 2);
-insert into TogruteForekomst values ("Torsdag", 2);
-insert into TogruteForekomst values ("Fredag", 2);
-insert into TogruteForekomst values ("Lørdag", 2);
-insert into TogruteForekomst values ("Søndag", 2);
-insert into TogruteForekomst values ("Mandag", 3);
-insert into TogruteForekomst values ("Tirsdag", 3);
-insert into TogruteForekomst values ("Onsdag", 3);
-insert into TogruteForekomst values ("Torsdag", 3);
-insert into TogruteForekomst values ("Fredag", 3);
+insert into TogruteForekomst values ("mandag", 1);
+insert into TogruteForekomst values ("tirsdag", 1);
+insert into TogruteForekomst values ("onsdag", 1);
+insert into TogruteForekomst values ("torsdag", 1);
+insert into TogruteForekomst values ("fredag", 1);
+insert into TogruteForekomst values ("mandag", 2);
+insert into TogruteForekomst values ("tirsdag", 2);
+insert into TogruteForekomst values ("onsdag", 2);
+insert into TogruteForekomst values ("torsdag", 2);
+insert into TogruteForekomst values ("fredag", 2);
+insert into TogruteForekomst values ("lørdag", 2);
+insert into TogruteForekomst values ("søndag", 2);
+insert into TogruteForekomst values ("mandag", 3);
+insert into TogruteForekomst values ("tirsdag", 3);
+insert into TogruteForekomst values ("onsdag", 3);
+insert into TogruteForekomst values ("torsdag", 3);
+insert into TogruteForekomst values ("fredag", 3);
 
 #Vogntype
 insert into Vogntype values ("SJ-sittevogn-1", "Sittevogn");

@@ -4,11 +4,24 @@ from python.hjelpemetoder import *
 
 
 def brukerhistorie_g():
+    '''
+    Dette er brukerhistorie G: Kjøp billett
+    Dette gjøres ved å hente telefonnummer, startstasjon, sluttstasjon og dato fra bruker.
+    Deretter sjekkes det om kunden finnes i databasen, og om det finnes en rute mellom start og sluttstasjon, 
+    og alle togruter som passer med delstrekningene.
+    Videre henter vi Sitte eller Sove bilett fra bruker.
+    Avhengig av om bruker velger Sitte eller Sove:
+        Sjekkes det om det er ledige seter på valgt togrute og får så brukeren til å velge sete.
+        Sjekkes om det er ledige kupeer på valgt togrute og får så brukeren til å velge kupe.
+    '''
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
     # Finner informasjon om kunden ved oppgitt telefonnummer
     tlf = input("Oppgi telefonnummer: ")
+    while tlf.isdigit() == False:
+        print("Telefonnummer må bestå av tall")
+        tlf = input("Oppgi telefonnummer: ")
 
     cursor.execute(
         "SELECT * FROM Kunde WHERE Mobilnummer = ?", (tlf,))
@@ -19,11 +32,15 @@ def brukerhistorie_g():
         print("Det finnes ingen kunder registrert med dette telefonnummeret")
         con.close()
         return
-    startStasjon = input("Skriv inn ønsket startstasjon: ")
-    sluttStasjon = input("Skriv inn ønsket sluttstasjon: ")
+
+    startStasjon = validJernbanestasjon(
+        input("Skriv inn ønsket startstasjon: "))
+    sluttStasjon = validJernbanestasjon(
+        input("Skriv inn ønsket sluttstasjon: "))
 
     # Finner ukedag til dato
-    dato_str = input("Angi ønsket dato (YYYY-MM-DD): ")
+    dato_str = dateCheck(input("Angi ønsket dato (YYYY-MM-DD): "))
+
     if startStasjon == "" or sluttStasjon == "" or dato_str == "":
         print("Du må fylle ut alle feltene")
         con.close()
@@ -141,14 +158,14 @@ def brukerhistorie_g():
                 seteNr = int(input("Skriv inn ønsket seteNr: "))
                 sittevognID = int(input("Skriv inn ønsket sittevognID: "))
 
+            while (seteNr, sittevognID) not in ledigeSeterList:
+                print("Setet er ikke ledig/eksisterer ikke")
+                seteNr = int(input("Skriv inn ønsket seteNr: "))
+                sittevognID = int(input("Skriv inn ønsket sittevognID: "))
+
             seteNrList.append(seteNr)
             sittevognIDList.append(sittevognID)
             kjøpt.append((seteNr, sittevognID))
-
-            if (seteNrList[i], sittevognIDList[i]) not in ledigeSeterList:
-                print("Setet er ikke ledig/eksisterer ikke")
-                con.close()
-                return
 
         # Kjøper billett hvis gyldige seter er oppgitt
         buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
@@ -156,6 +173,7 @@ def brukerhistorie_g():
 
     # Tilsvarende som for sitte-seter, bare for sovekupéer
     elif typeBillett == "Sove":
+        # Finner alle kupeer som er opptatt på valgt togrute
         opptatteKupeer = []
         cursor.execute(
             '''select Strekningsnavn from Delstrekning where StrekningsID = ?''', (delstrekningID[0],))
@@ -166,12 +184,14 @@ def brukerhistorie_g():
         resultat = cursor.fetchall()
         for x in resultat:
             opptatteKupeer.append(x)
+        # Henter alle kupeer
         cursor.execute('''select * from Kupee''')
         kupeer = cursor.fetchall()
-        kupeerFint = []
+        # Henter alle vogner på valgt togrute
         cursor.execute(
             '''select SovevognID from BestårAv where TogruteID = ?''', (valgtTogruteID,))
         vogner = cursor.fetchall()
+        # Liste over ID til alle vogner på valgt togrute
         vognIDList = []
         for i in vogner:
             vognIDList.append(i[0])
@@ -183,24 +203,29 @@ def brukerhistorie_g():
         if len(vogner) == 0:
             print("Det er ingen passende vogner på valgt togrute")
             return
+        kupeeIDList = []
+        # Finner alle ledige kupeer på valgt togrute
         for i in kupeer:
             if i[1] in vognIDList:
-                kupeerFint.append(i)
+                kupeeIDList.append(i)
+        # Lager liste over alle opptatte kupeer på valgt togrute
         fjernPlasser = []
-        for i in kupeerFint:
+        for i in kupeeIDList:
             for x in opptatteKupeer:
                 if i[0] == x[1] and i[1] == x[2]:
                     fjernPlasser.append(i)
         fjernPlasser = set(fjernPlasser)
+        # Fjerner alle opptatte kupeer fra listen over ledige kupeer
         for i in fjernPlasser:
-            kupeerFint.remove(i)
+            kupeeIDList.remove(i)
 
         print("Ledige kupeer på formen: ")
         print("(KupeeNr, SovevognID)")
-        for i in kupeerFint:
+        for i in kupeeIDList:
             print(i)
+        # Sjekker om det er nok ledige kupeer på valgt togrute
         antallBilletter = int(input("Skriv inn antall billetter: "))
-        if antallBilletter > len(kupeerFint):
+        if antallBilletter > len(kupeeIDList):
             print("Det er ikke nok ledige kupeer på dette toget")
             con.close()
             return
@@ -208,23 +233,27 @@ def brukerhistorie_g():
         sovevognIDList = []
         kjøpt = []
 
+        # Spør bruker om ønsket kupeer
         for i in range(antallBilletter):
             kupeeNr = int(input("Skriv inn ønsket kupeeNr: "))
             sovevognID = int(input("Skriv inn ønsket sovevognID: "))
 
+            # Sjekker om bruker oppgir gyldige kupeer
             while (kupeeNr, sovevognID) in kjøpt:
                 print("Kupee er allerede valgt")
                 kupeeNr = int(input("Skriv inn ønsket kupeeNr: "))
                 sovevognID = int(input("Skriv inn ønsket sovevognID: "))
 
+            while (kupeeNr, sovevognID) not in kupeeIDList:
+                print("Kupee er ikke ledig/eksisterer ikke")
+                con.close()
+                return
+
             kupeeNrList.append(kupeeNr)
             sovevognIDList.append(sovevognID)
             kjøpt.append((kupeeNr, sovevognID))
 
-            if (kupeeNrList[i], sovevognIDList[i]) not in kupeerFint:
-                print("Kupee er ikke ledig/eksisterer ikke")
-                con.close()
-                return
+        # Kjøper billett hvis gyldige kupeer er oppgitt
         buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
                   tlf, sovevognIDList, kupeeNrList, antallBilletter, strekningsnavn)
 
@@ -237,6 +266,12 @@ def brukerhistorie_g():
 
 
 def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vognID, seteKupeeNr, antallBilletter, strekningsnavn):
+    '''
+    Denne funksjonen legger inn all informasjon som vi har funnet i funksjonen brukerhistorie_g, og legger det inn i databasen i tabellene
+    avhengig av om man har valgt sittebilett eller sovebilett.
+        Ved Sittebillett legges informasjonen inn i tabellene SeteBilettTilhørerBanestrekning, Sittebilett og kundeordre.
+        Ved Sovebillett legges informasjonen inn i tabellene SoveBilettTilhørerBanestrekning, Sovebilett og kundeordre.
+    '''
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
@@ -279,7 +314,7 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
             "select * from SeteBillett order by BillettNr asc")
         setebillett = cursor.fetchall()
         setebillettID = 0
-        # Finner setebillettID til den nye setebilletten
+        # Finner setebillettID til den nye setebilletten som er 1 større enn den siste setebilletten
         if len(setebillett) == 0:
             setebillettID = 0
         elif len(setebillett) == 1:
@@ -292,6 +327,8 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
         sittevognID = vognID
         antallBilletkjøp = antallBilletter
 
+        # Legger inn informasjonen i tabellene SeteBillettTilhørerBanestrekning, SeteBillett og Kundeordre
+        # Hvis det er unique constraint feil, så vil en feilmelding bli printet ut
         try:
             for x in range(int(antallBilletkjøp)):
                 for i in delstrekningID:
@@ -313,6 +350,7 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
         cursor.execute(
             "select * from SoveBillett order by BillettNr asc")
         sovebillett = cursor.fetchall()
+        # Finner sovebillettID til den nye sovebillett som er 1 større enn den siste sovebillettIDen
         sovebillettID = 0
         if len(sovebillett) == 0:
             sovebillettID = 0
@@ -326,6 +364,8 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
         SovevognID = vognID
         antallBilletkjøp = antallBilletter
 
+        # Legger inn informasjonen i tabellene SoveBillettTilhørerBanestrekning, SoveBillett og Kundeordre
+        # Hvis det er unique constraint feil, så vil en feilmelding bli printet ut
         try:
             for x in range(antallBilletkjøp):
                 cursor.execute(

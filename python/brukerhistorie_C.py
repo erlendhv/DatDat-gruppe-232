@@ -1,12 +1,19 @@
 import sqlite3
+from python.hjelpemetoder import *
 
 
 def brukerhistorie_c():
+    ''''
+    Brukerhistorie C: Se info om togrute innom en stasjon. 
+    Dette gjøres ved å skrive inn stasjon og ukedag, 
+    og så joine Togruteforekomst, TogruteTabell for å finne for å kunne velge passende stasjon og ukedag.
+    '''
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
-    stasjon = input("Skriv inn stasjon: ")
-    dag = input("Skriv inn ukedag: ")
+    stasjon = validJernbanestasjon(input("Skriv inn stasjon: "))
+
+    dag = input("Skriv inn ukedag: ").lower()
 
     # tar natural join på StasjonerITabell, TogruteTabell og Togruteforekomst hvor ukedag i TogruteForekomst
     # er oppgitt ukedag og Stasjonsnavn i StasjonerITabell er oppgitt stasjon.

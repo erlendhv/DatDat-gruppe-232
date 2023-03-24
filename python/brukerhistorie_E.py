@@ -2,6 +2,11 @@ import sqlite3
 
 
 def brukerhistorie_e():
+    '''
+    Brukerhistorie E: Registrering av ny bruker
+    Dette gjøres ved å hente navn, epost og mobilnummer fra brukeren. 
+    Denne informasjonen blir så lagt inn i Kundetabellen i databasen.
+    '''
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
@@ -20,7 +25,11 @@ def brukerhistorie_e():
     Kundenummer += 1
     Kundenavn = input("Skriv inn navnet ditt: ")
     Epost = input("Skriv inn E-post: ")
+
     Mobilnummer = input("Skriv inn mobilnummer: ")
+    while Mobilnummer.isdigit() == False:
+        print("Mobilnummer må bestå av tall")
+        Mobilnummer = input("Skriv inn mobilnummer: ")
 
     # Legger til kunden i databasen
     try:
