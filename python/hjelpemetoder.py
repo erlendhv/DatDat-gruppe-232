@@ -69,9 +69,10 @@ def findTogruteID(startStasjon, sluttStasjon):
     delstrekninger = findDelstrekning(startStasjon, sluttStasjon)
     if len(delstrekninger) == 0:
         return []
-    delstrekningIDFint = []
+    delstrekningIDList = []
     for i in delstrekninger:
-        delstrekningIDFint.append(i[0])
+        delstrekningIDList.append(i[0])
+    # finner alle togruter
     cursor.execute(
         "SELECT distinct TogruteID FROM Togrute")
     togruteID = cursor.fetchall()
@@ -79,15 +80,20 @@ def findTogruteID(startStasjon, sluttStasjon):
     for i in togruteID:
         IDer.append(i[0])
     godkjentTogID = []
+    # går gjennom alle togruter og sjekker om de har alle delstrekningene
     for i in IDer:
         cursor.execute(
             "SELECT StrekningsID FROM TogruteHarDelstrekning where TogruteID = ?", (i,))
         TogruteHarDelstrekning = cursor.fetchall()
-        penListe = []
+        strekningsIDListTilTogrute = []
+        # lager en liste med alle strekningsIDene til togruten
         for x in TogruteHarDelstrekning:
-            penListe.append(x[0])
-        common_list = set(delstrekningIDFint).intersection(penListe)
-        if len(common_list) == len(delstrekningIDFint):
+            strekningsIDListTilTogrute.append(x[0])
+        # finner snittet mellom togrutens liste over delstrekninger og delstrekningene
+        common_list = set(delstrekningIDList).intersection(
+            strekningsIDListTilTogrute)
+        # hvis snittet er lik lengden på antall delstrekninger, er togruten godkjent
+        if len(common_list) == len(delstrekningIDList):
             godkjentTogID.append(i)
 
     con.close()
