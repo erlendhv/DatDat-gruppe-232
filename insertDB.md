@@ -1,3 +1,5 @@
+#Brukerhistorie a og b
+
 #Jernbanestasjon
 insert into Jernbanestasjon values ("Trondheim S", 5.1);
 insert into Jernbanestasjon values ("Steinkjer", 3.6);
