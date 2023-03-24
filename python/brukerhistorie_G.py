@@ -68,21 +68,32 @@ def brukerhistorie_g():
         print("Det finnes ingen rute mellom disse stasjonene")
         con.close()
         return
-    print("Skriv inn ønsket TogruteID fra listen under på formen")
-    print("(Startstasjon, TogruteID, AvgangsTid)")
+
+    togruteToBePrinted = []
     for i in togruteID:
         cursor.execute(
             '''select * from TogruteForekomst where TogruteID = ? and Ukedag = ?''', (i, ukedag1))
-        valid = cursor.fetchall()
-        if len(valid) != 0:
+        validTogruteForekomst = cursor.fetchall()
+        if len(validTogruteForekomst) != 0:
             cursor.execute(
                 '''select Stasjonsnavn, TogruteTabellID, Avgangstid from stasjoneritabell where 
                 (togrutetabellid = ?) and stasjonsnavn = ?''', (i, startStasjon))
-            print(cursor.fetchall())
+            result = cursor.fetchall()[0]
+            togruteToBePrinted.append(result)
+
+    if len(togruteToBePrinted) == 0:
+        print("Det finnes ingen rute mellom disse stasjonene på denne dagen")
+        con.close()
+        return
+    print("Skriv inn ønsket TogruteID fra listen under på formen")
+    print("(Startstasjon, TogruteID, AvgangsTid)")
+    for i in togruteToBePrinted:
+        print(i)
 
     valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
     # Denne løkken passer på at brukeren skriver inn en gyldig TogruteID
     while valgtTogruteID == "" or not valgtTogruteID.isnumeric():
+        print("Ugyldig TogruteID")
         valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
     cursor.execute(
         '''select Strekningsnavn from Togrute where TogruteID = ?''', (valgtTogruteID,))

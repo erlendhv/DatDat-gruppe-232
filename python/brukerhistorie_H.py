@@ -21,12 +21,13 @@ def brukerhistorie_h():
 
     # Henter ut kundeordre for kunden som har oppgitt telefonnummer og epost
     cursor.execute(
-        "SELECT * FROM Kundeordre NATURAL JOIN Kunde WHERE Mobilnummer = ?", (tlf, ))
+        "SELECT Ordrenummer, Dato, Tid, AntallBillettkjøp, Kundenummer FROM Kundeordre NATURAL JOIN Kunde WHERE Mobilnummer = ?", (tlf, ))
     resultat = cursor.fetchall()
     if len(resultat) == 0:
         con.close()
         return print("Fant ingen bestillinger for kunden med tlf: " + tlf)
-    print("Alle kundeordrer for denne kunden: ")
+    print("Alle kundeordrer for denne kunden på formen: ")
+    print("(Ordrenummer, Dato, Tid, AntallBillettkjøp, Kundenummer)")
     for i in resultat:
         print(i)
 

@@ -81,9 +81,17 @@ def brukerhistorie_d():
         avgangsListe.append(i)
 
     # Hvis TogruteID er en togrute som finnes mellom de to stasjonene, printes den.
-    print("('Startstasjon', 'Avgangstid', 'TogruteID', 'Ukedag')")
+    printList = []
     for i in avgangsListe:
         if i[2] in godkjentTogID:
-            print(i)
+            printList.append(i)
+
+    if len(printList) == 0:
+        print("Fant ingen avganger for denne togruten.")
+        return
+
+    print("('Startstasjon', 'Avgangstid', 'TogruteID', 'Ukedag')")
+    for i in printList:
+        print(i)
 
     con.close()
