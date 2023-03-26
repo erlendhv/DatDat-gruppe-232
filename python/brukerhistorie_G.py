@@ -97,6 +97,12 @@ def brukerhistorie_g():
         valgtTogruteID = input("Skriv inn ønsket TogruteID: ")
     cursor.execute(
         '''select Strekningsnavn from Togrute where TogruteID = ?''', (valgtTogruteID,))
+    
+    # Finner dagen toget drar fra startstasjonen
+    if valgtTogruteID == "2" and startStasjon != "Trondheim S":
+        datebefore = dato1 - datetime.timedelta(days=1)
+        dato1 = datebefore
+    
     strekningsnavn = cursor.fetchall()[0][0]
 
     typeBillett = input("Skriv inn type billett (Sitte/Sove): ")
@@ -180,7 +186,7 @@ def brukerhistorie_g():
 
         # Kjøper billett hvis gyldige seter er oppgitt
         buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
-                  tlf, sittevognIDList, seteNrList, antallBilletter, strekningsnavn)
+                  tlf, sittevognIDList, seteNrList, antallBilletter, strekningsnavn, valgtTogruteID)
 
     # Tilsvarende som for sitte-seter, bare for sovekupéer
     elif typeBillett == "Sove":
@@ -266,7 +272,7 @@ def brukerhistorie_g():
 
         # Kjøper billett hvis gyldige kupeer er oppgitt
         buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett,
-                  tlf, sovevognIDList, kupeeNrList, antallBilletter, strekningsnavn)
+                  tlf, sovevognIDList, kupeeNrList, antallBilletter, strekningsnavn, valgtTogruteID)
 
     else:
         print("Ugyldig type billett")
@@ -276,7 +282,7 @@ def brukerhistorie_g():
 # Funksjon som kjøper valgt billett
 
 
-def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vognID, seteKupeeNr, antallBilletter, strekningsnavn):
+def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vognID, seteKupeeNr, antallBilletter, strekningsnavn, valgtTogruteID):
     '''
     Denne funksjonen legger inn all informasjon som vi har funnet i funksjonen brukerhistorie_g, og legger det inn i databasen i tabellene
     avhengig av om man har valgt sittebilett eller sovebilett.
@@ -286,6 +292,13 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
     con = sqlite3.connect('232DB.db')
     cursor = con.cursor()
 
+    #Finner korrekt dato til å sette i billettabellen
+    if valgtTogruteID == "2" and startStasjon != "Trondheim S":
+        dateafter = dato1 + datetime.timedelta(days=1)
+        billettTableDato = dateafter
+    else:
+        billettTableDato = dato1
+    
     # Finner dagens dato og tid
     billettDato = dato1
     ordreDato = datetime.date.today()
@@ -347,7 +360,7 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
                         "insert into SeteBillettTilhørerDelstrekning values (?, ?, ?, ?, ?, ?, ?)", (i, billettDato, seteNr[x], sittevognID[x], strekningsnavn, setebillettID, ordrenummer))
                     con.commit()
                 cursor.execute(
-                    "insert into SeteBillett values (?, ?, ?, ?, ?, ?, ?)", (setebillettID, billettDato, startStasjon, sluttStasjon, seteNr[x], sittevognID[x], ordrenummer))
+                    "insert into SeteBillett values (?, ?, ?, ?, ?, ?, ?)", (setebillettID, billettTableDato, startStasjon, sluttStasjon, seteNr[x], sittevognID[x], ordrenummer))
                 con.commit()
                 setebillettID += 1
             cursor.execute(
@@ -383,7 +396,7 @@ def buyTicket(startStasjon, sluttStasjon, dato1, ukedag1, typeBillett, tlf, vogn
                     "insert into SoveBillettTilhørerBanestrekning values (?, ?, ?, ?, ?, ?)", (billettDato, KupeeNr[x], SovevognID[x], strekningsnavn, sovebillettID, ordrenummer))
                 con.commit()
                 cursor.execute(
-                    "insert into SoveBillett values (?, ?, ?, ?, ?, ?, ?)", (sovebillettID, billettDato, startStasjon, sluttStasjon, KupeeNr[x], SovevognID[x], ordrenummer))
+                    "insert into SoveBillett values (?, ?, ?, ?, ?, ?, ?)", (sovebillettID, billettTableDato, startStasjon, sluttStasjon, KupeeNr[x], SovevognID[x], ordrenummer))
                 con.commit()
                 sovebillettID += 1
             cursor.execute(
